@@ -169,14 +169,12 @@
             border-radius: 20px;
             padding: 20px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            overflow-x: auto;
         }
 
         .schedule-table {
             width: 100%;
             border-collapse: separate;
             border-spacing: 8px;
-            min-width: 900px;
         }
 
         .schedule-table th {
@@ -340,10 +338,10 @@
 
             .schedule-grid {
                 padding: 16px;
+                overflow: hidden;
             }
 
             .schedule-table {
-                min-width: 100%;
                 border-spacing: 0;
                 display: block;
             }
@@ -353,46 +351,60 @@
             }
 
             .schedule-table tbody {
-                display: block;
+                display: flex;
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                gap: 12px;
+                padding: 10px 4px 20px 4px;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+            }
+
+            .schedule-table tbody::-webkit-scrollbar {
+                display: none;
             }
 
             .schedule-table tr {
-                display: block;
-                margin-bottom: 16px;
-                background: #f8f9fa;
-                border-radius: 12px;
-                overflow: hidden;
+                display: flex;
+                width: 100%;
             }
 
             .schedule-table td {
+                flex: 0 0 85%;
+                scroll-snap-align: center;
                 display: block;
-                width: 100%;
-                padding: 16px;
-                border-bottom: 1px solid #eee;
+                background: #f8f9fa;
+                border-radius: 16px;
+                padding: 20px 16px 16px 16px;
+                margin: 0;
+                border: none;
                 position: relative;
-                padding-top: 40px;
-            }
-
-            .schedule-table td:last-child {
-                border-bottom: none;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.04);
             }
 
             .schedule-table td::before {
                 content: attr(data-day);
-                position: absolute;
-                top: 12px;
-                left: 16px;
+                display: block;
+                font-size: 1.1rem;
                 font-weight: 700;
                 color: #c41e3a;
-                font-size: 0.85rem;
+                margin-bottom: 4px;
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
             }
 
+            .schedule-table td::after {
+                content: attr(data-date);
+                display: block;
+                font-size: 0.8rem;
+                color: #666;
+                margin-bottom: 16px;
+                font-weight: 500;
+            }
+
             .schedule-table td .no-class {
-                padding: 16px;
-                text-align: left;
-                padding-top: 0;
+                padding: 16px 0;
+                text-align: center;
             }
 
             .legend {
@@ -508,7 +520,9 @@
                 const dayStr = String(d.getDate()).padStart(2, '0');
                 const monthStr = String(d.getMonth() + 1).padStart(2, '0');
                 const yearStr = d.getFullYear();
-                document.getElementById(`date-${day}`).textContent = `${dayStr}-${monthStr}-${yearStr}`;
+                const formattedDate = `${dayStr}-${monthStr}-${yearStr}`;
+                document.getElementById(`date-${day}`).textContent = formattedDate;
+                document.getElementById(day).setAttribute('data-date', formattedDate);
             });
         }
 
@@ -544,7 +558,7 @@
                 { id: 'sabado', label: 'SÁBADO' }
             ];
 
-            daysMap.forEach((dayObj, index) => {
+            daysMap.forEach((dayObj) => {
                 const dayElement = document.getElementById(dayObj.id);
                 dayElement.setAttribute('data-day', dayObj.label);
                 dayElement.innerHTML = '<div class="no-class">Sin clases</div>';
@@ -589,7 +603,7 @@
                             <div class="status-dot"></div>
                             <div class="class-name">${cls.name}</div>
                             <div class="class-time">🕐 ${cls.start} - ${cls.end}</div>
-                            <div class="class-room">📍 ${cls.room}</div>
+                            <div class="class-room"> ${cls.room}</div>
                             ${statusText ? `<div class="class-status-text">${statusText}</div>` : ''}
                         `;
                         dayElement.appendChild(card);
@@ -661,7 +675,7 @@
                     throw new Error('Error en la respuesta');
                 }
             } catch (error) {
-                cooldownText.textContent = '❌ Error al enviar';
+                cooldownText.textContent = ' Error al enviar';
                 cooldownText.style.color = '#c41e3a';
                 console.error('Error:', error);
             } finally {
