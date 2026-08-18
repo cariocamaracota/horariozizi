@@ -315,7 +315,15 @@
         .legend-dot.yellow { background: #f59e0b; }
         .legend-dot.gray { background: #ddd; }
 
+        .mobile-schedule {
+            display: none;
+        }
+
         @media (max-width: 768px) {
+            body {
+                padding: 12px;
+            }
+
             .header {
                 flex-direction: column;
                 text-align: center;
@@ -323,7 +331,7 @@
             }
             
             .header-content h1 {
-                font-size: 1.5rem;
+                font-size: 1.4rem;
             }
 
             .status-bar {
@@ -338,73 +346,133 @@
 
             .schedule-grid {
                 padding: 16px;
-                overflow: hidden;
             }
 
             .schedule-table {
-                border-spacing: 0;
-                display: block;
-            }
-
-            .schedule-table thead {
                 display: none;
             }
 
-            .schedule-table tbody {
-                display: flex;
-                overflow-x: auto;
-                scroll-snap-type: x mandatory;
-                gap: 12px;
-                padding: 10px 4px 20px 4px;
-                -webkit-overflow-scrolling: touch;
-                scrollbar-width: none;
-            }
-
-            .schedule-table tbody::-webkit-scrollbar {
-                display: none;
-            }
-
-            .schedule-table tr {
-                display: flex;
-                width: 100%;
-            }
-
-            .schedule-table td {
-                flex: 0 0 85%;
-                scroll-snap-align: center;
+            .mobile-schedule {
                 display: block;
+            }
+
+            .day-card {
                 background: #f8f9fa;
-                border-radius: 16px;
-                padding: 20px 16px 16px 16px;
-                margin: 0;
-                border: none;
-                position: relative;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+                border-radius: 12px;
+                padding: 12px;
+                margin-bottom: 10px;
             }
 
-            .schedule-table td::before {
-                content: attr(data-day);
-                display: block;
-                font-size: 1.1rem;
+            .day-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 10px;
+                padding-bottom: 8px;
+                border-bottom: 2px solid #e5e7eb;
+            }
+
+            .day-name {
                 font-weight: 700;
                 color: #c41e3a;
-                margin-bottom: 4px;
+                font-size: 0.9rem;
                 text-transform: uppercase;
-                letter-spacing: 0.5px;
             }
 
-            .schedule-table td::after {
-                content: attr(data-date);
-                display: block;
-                font-size: 0.8rem;
+            .day-date {
+                font-size: 0.75rem;
                 color: #666;
-                margin-bottom: 16px;
                 font-weight: 500;
             }
 
-            .schedule-table td .no-class {
-                padding: 16px 0;
+            .day-classes {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .mobile-class-card {
+                background: white;
+                border-radius: 8px;
+                padding: 10px;
+                border-left: 3px solid #ddd;
+                position: relative;
+            }
+
+            .mobile-class-card.active {
+                border-left-color: #22c55e;
+                background: #f0fdf4;
+            }
+
+            .mobile-class-card.soon {
+                border-left-color: #f59e0b;
+                background: #fffbeb;
+            }
+
+            .mobile-class-card .status-dot {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: #ddd;
+            }
+
+            .mobile-class-card.active .status-dot {
+                background: #22c55e;
+                animation: pulse 2s infinite;
+            }
+
+            .mobile-class-card.soon .status-dot {
+                background: #f59e0b;
+            }
+
+            .mobile-class-name {
+                font-weight: 600;
+                color: #333;
+                font-size: 0.8rem;
+                margin-bottom: 4px;
+                padding-right: 16px;
+            }
+
+            .mobile-class-time {
+                font-size: 0.7rem;
+                color: #666;
+                margin-bottom: 3px;
+            }
+
+            .mobile-class-room {
+                font-size: 0.7rem;
+                color: #c41e3a;
+                font-weight: 500;
+            }
+
+            .mobile-class-status-text {
+                font-size: 0.65rem;
+                margin-top: 4px;
+                padding: 2px 6px;
+                border-radius: 4px;
+                display: inline-block;
+                font-weight: 500;
+            }
+
+            .mobile-class-card.active .mobile-class-status-text {
+                background: #22c55e;
+                color: white;
+            }
+
+            .mobile-class-card.soon .mobile-class-status-text {
+                background: #f59e0b;
+                color: white;
+            }
+
+            .mobile-no-class {
                 text-align: center;
+                color: #aaa;
+                font-size: 0.8rem;
+                padding: 16px;
+                font-style: italic;
             }
 
             .legend {
@@ -459,6 +527,8 @@
                     </tr>
                 </tbody>
             </table>
+
+            <div class="mobile-schedule" id="mobileSchedule"></div>
 
             <div class="legend">
                 <div class="legend-item">
@@ -603,13 +673,82 @@
                             <div class="status-dot"></div>
                             <div class="class-name">${cls.name}</div>
                             <div class="class-time">🕐 ${cls.start} - ${cls.end}</div>
-                            <div class="class-room"> ${cls.room}</div>
+                            <div class="class-room">📍 ${cls.room}</div>
                             ${statusText ? `<div class="class-status-text">${statusText}</div>` : ''}
                         `;
                         dayElement.appendChild(card);
                     });
                 }
             }
+
+            const mobileSchedule = document.getElementById('mobileSchedule');
+            mobileSchedule.innerHTML = '';
+
+            daysMap.forEach((dayObj, index) => {
+                const dayNum = index + 1;
+                const classes = schedule[dayNum];
+                const dayElement = document.getElementById(dayObj.id);
+                const dateText = dayElement.getAttribute('data-date') || '--';
+
+                const dayCard = document.createElement('div');
+                dayCard.className = 'day-card';
+
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'day-header';
+                dayHeader.innerHTML = `
+                    <div class="day-name">${dayObj.label}</div>
+                    <div class="day-date">${dateText}</div>
+                `;
+                dayCard.appendChild(dayHeader);
+
+                const dayClasses = document.createElement('div');
+                dayClasses.className = 'day-classes';
+
+                if (classes && classes.length > 0) {
+                    classes.forEach((cls) => {
+                        const startMinutes = timeToMinutes(cls.start);
+                        const endMinutes = timeToMinutes(cls.end);
+                        
+                        let statusText = '';
+                        let cardClass = '';
+
+                        if (dayNum === dayOfWeek) {
+                            if (currentMinutes >= startMinutes && currentMinutes < endMinutes) {
+                                const elapsed = currentMinutes - startMinutes;
+                                if (elapsed >= 5) {
+                                    statusText = `En curso (${elapsed} min)`;
+                                    cardClass = 'active';
+                                } else {
+                                    statusText = '¡Clase iniciada!';
+                                    cardClass = 'active';
+                                }
+                            } else if (currentMinutes >= startMinutes - 5 && currentMinutes < startMinutes) {
+                                statusText = `Comienza en ${startMinutes - currentMinutes} min`;
+                                cardClass = 'soon';
+                            }
+                        }
+
+                        const classCard = document.createElement('div');
+                        classCard.className = `mobile-class-card ${cardClass}`;
+                        classCard.innerHTML = `
+                            <div class="status-dot"></div>
+                            <div class="mobile-class-name">${cls.name}</div>
+                            <div class="mobile-class-time">🕐 ${cls.start} - ${cls.end}</div>
+                            <div class="mobile-class-room">📍 ${cls.room}</div>
+                            ${statusText ? `<div class="mobile-class-status-text">${statusText}</div>` : ''}
+                        `;
+                        dayClasses.appendChild(classCard);
+                    });
+                } else {
+                    const noClass = document.createElement('div');
+                    noClass.className = 'mobile-no-class';
+                    noClass.textContent = 'Sin clases';
+                    dayClasses.appendChild(noClass);
+                }
+
+                dayCard.appendChild(dayClasses);
+                mobileSchedule.appendChild(dayCard);
+            });
 
             const indicator = document.getElementById('statusIndicator');
             const classText = document.getElementById('currentClassText');
@@ -652,7 +791,7 @@
 
             try {
                 sendBtn.disabled = true;
-                cooldownText.textContent = '📤 Enviando...';
+                cooldownText.textContent = ' Enviando...';
                 cooldownText.style.color = '#666';
 
                 const response = await fetch(WEBHOOK_URL, {
@@ -675,7 +814,7 @@
                     throw new Error('Error en la respuesta');
                 }
             } catch (error) {
-                cooldownText.textContent = ' Error al enviar';
+                cooldownText.textContent = '❌ Error al enviar';
                 cooldownText.style.color = '#c41e3a';
                 console.error('Error:', error);
             } finally {
