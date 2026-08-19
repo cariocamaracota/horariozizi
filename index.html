@@ -194,7 +194,7 @@
     <div class="container">
         <div class="header">
             <div class="header-content">
-                <h1>📚 Mi Horario de Clases</h1>
+                <h1> Mi Horario de Clases</h1>
                 <p>Materias</p>
             </div>
             <div class="message-section">
@@ -211,7 +211,7 @@
 
         <div class="announcement-box" id="announcementBox">
             <div class="announcement-header">
-                <div class="announcement-title"> Aviso Importante</div>
+                <div class="announcement-title">📢 Aviso Importante</div>
                 <button class="edit-ann-btn" onclick="toggleEditAnnouncement()">✏️ Editar</button>
             </div>
             <div class="announcement-content" id="announcementContent"></div>
@@ -223,7 +223,7 @@
 
         <div class="checkin-section">
             <div class="checkin-header">
-                <div class="checkin-title"> Confirmación de Asistencia</div>
+                <div class="checkin-title">📍 Confirmación de Asistencia</div>
                 <button class="checkin-btn" id="checkinBtn" onclick="confirmCheckin()">
                     <span id="checkinBtnText">Confirmar Llegada</span>
                 </button>
@@ -750,9 +750,6 @@
                     statusText = `Comienza en ${startMinutes - currentMinutes} min`;
                     cardClass = 'soon';
                 }
-            } else if (currentMinutes >= endMinutes && dayNum < dayOfWeek) {
-                endedText = 'Clase terminada';
-                cardClass = 'ended';
             }
 
             const canEnd = cardClass === 'active' || (dayNum === dayOfWeek && currentMinutes >= startMinutes && currentMinutes < endMinutes);
@@ -878,7 +875,7 @@
                 classText.textContent = `${activeClass.name} - ${activeClass.room}`;
             } else if (soonClass) {
                 indicator.className = 'status-indicator soon';
-                classText.textContent = ` Próxima: ${soonClass.name} en 5 min`;
+                classText.textContent = `⏰ Próxima: ${soonClass.name} en 5 min`;
             } else {
                 indicator.className = 'status-indicator';
                 classText.textContent = '💤 Sin clases en este momento';
@@ -892,7 +889,7 @@
             const messageText = messageInput.value.trim();
 
             if (!messageText) {
-                cooldownText.textContent = '⚠️ Escribe algo';
+                cooldownText.textContent = '️ Escribe algo';
                 cooldownText.style.color = '#c41e3a';
                 return;
             }
