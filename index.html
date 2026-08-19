@@ -36,7 +36,6 @@
         .announcement-edit-area textarea { width: 100%; padding: 12px; border: 2px solid #fde68a; border-radius: 10px; font-size: 1rem; font-family: 'Inter', sans-serif; min-height: 80px; resize: vertical; }
         .announcement-edit-area textarea:focus { outline: none; border-color: #c41e3a; }
         .save-ann-btn { margin-top: 10px; padding: 8px 16px; background: #22c55e; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
-        
         .checkin-section { background: white; border-radius: 16px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); display: flex; flex-direction: column; gap: 12px; }
         .checkin-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         .checkin-title { font-weight: 700; color: #333; font-size: 1rem; }
@@ -46,12 +45,39 @@
         .checkin-btn:disabled { opacity: 0.6; cursor: not-allowed; }
         .checkin-btn.checked { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); }
         .checkin-status { font-size: 0.85rem; color: #666; font-weight: 500; }
+        .checkin-actions { display: none; gap: 8px; flex-wrap: wrap; }
+        .admin-mode .checkin-actions { display: flex; }
+        .checkin-action-btn { padding: 6px 12px; border: none; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
+        .checkin-action-btn.edit { background: #f59e0b; color: white; }
+        .checkin-action-btn.remove { background: #ef4444; color: white; }
         .checkin-history { margin-top: 10px; padding-top: 15px; border-top: 1px solid #eee; }
         .checkin-history-title { font-size: 0.85rem; font-weight: 600; color: #666; margin-bottom: 10px; }
         .checkin-entry { background: #f8f9fa; border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; border-left: 3px solid #3b82f6; font-size: 0.8rem; }
         .checkin-entry .time { font-weight: 600; color: #333; }
         .checkin-entry .date { color: #666; font-size: 0.75rem; }
-
+        .comments-section { background: white; border-radius: 16px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .comments-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .comments-title { font-weight: 700; color: #333; font-size: 1rem; }
+        .add-comment-btn { padding: 8px 16px; background: #8b5cf6; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; display: none; font-family: 'Inter', sans-serif; }
+        .admin-mode .add-comment-btn { display: block; }
+        .comment-form { display: none; margin-bottom: 15px; padding: 15px; background: #f8f9fa; border-radius: 10px; }
+        .comment-form.active { display: block; }
+        .comment-form textarea { width: 100%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.9rem; font-family: 'Inter', sans-serif; resize: vertical; min-height: 60px; margin-bottom: 10px; }
+        .comment-form textarea:focus { outline: none; border-color: #8b5cf6; }
+        .comment-form-actions { display: flex; gap: 8px; justify-content: flex-end; }
+        .comment-form-btn { padding: 6px 14px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 0.85rem; }
+        .comment-form-btn.save { background: #22c55e; color: white; }
+        .comment-form-btn.cancel { background: #e5e7eb; color: #333; }
+        .comment-item { background: #f8f9fa; border-radius: 10px; padding: 12px; margin-bottom: 10px; border-left: 3px solid #8b5cf6; }
+        .comment-text { color: #333; font-size: 0.9rem; line-height: 1.4; margin-bottom: 6px; white-space: pre-wrap; }
+        .comment-meta { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+        .comment-date { color: #666; font-size: 0.75rem; }
+        .comment-actions { display: none; gap: 6px; }
+        .admin-mode .comment-actions { display: flex; }
+        .comment-action-btn { padding: 4px 10px; border: none; border-radius: 5px; font-size: 0.75rem; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
+        .comment-action-btn.edit { background: #f59e0b; color: white; }
+        .comment-action-btn.delete { background: #ef4444; color: white; }
+        .no-comments { text-align: center; color: #aaa; font-size: 0.85rem; padding: 20px; font-style: italic; }
         .status-bar { background: white; border-radius: 16px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
         .current-time { font-size: 1.5rem; font-weight: 600; color: #333; }
         .current-class { display: flex; align-items: center; gap: 10px; font-size: 0.95rem; color: #555; flex: 1; }
@@ -59,7 +85,6 @@
         .status-indicator.active { background: #22c55e; box-shadow: 0 0 10px rgba(34, 197, 94, 0.5); animation: pulse 2s infinite; }
         .status-indicator.soon { background: #f59e0b; box-shadow: 0 0 10px rgba(245, 158, 11, 0.5); }
         @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.2); opacity: 0.8; } }
-        
         .schedule-grid { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
         .schedule-table { width: 100%; border-collapse: separate; border-spacing: 4px; }
         .schedule-table th { background: linear-gradient(135deg, #c41e3a 0%, #a01830 100%); color: white; padding: 12px 8px; border-radius: 10px; font-weight: 600; font-size: 0.85rem; text-align: center; position: relative; }
@@ -68,7 +93,6 @@
         .schedule-table th.today .today-indicator { display: block; background: white; }
         .schedule-table th .date { font-size: 0.7rem; font-weight: 400; opacity: 0.9; margin-top: 3px; }
         .schedule-table td { padding: 8px; vertical-align: top; background: #fafafa; border-radius: 8px; }
-        
         .class-card { background: white; border-radius: 10px; padding: 12px; margin-bottom: 6px; border-left: 3px solid #ddd; transition: all 0.3s ease; position: relative; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .class-card:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         .class-card.active { border-left-color: #22c55e; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); box-shadow: 0 2px 10px rgba(34, 197, 94, 0.15); }
@@ -78,7 +102,6 @@
         .class-card.active .status-dot { background: #22c55e; box-shadow: 0 0 6px rgba(34, 197, 94, 0.6); animation: pulse 2s infinite; }
         .class-card.soon .status-dot { background: #f59e0b; box-shadow: 0 0 6px rgba(245, 158, 11, 0.6); }
         .class-card.ended .status-dot { background: #999; }
-        
         .class-name { font-weight: 600; color: #333; font-size: 0.8rem; margin-bottom: 5px; padding-right: 18px; line-height: 1.3; }
         .class-time { font-size: 0.7rem; color: #666; margin-bottom: 3px; }
         .class-room { font-size: 0.7rem; color: #c41e3a; font-weight: 500; }
@@ -90,19 +113,17 @@
         .att-input { width: 50px; padding: 3px 6px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.7rem; font-family: 'Inter', sans-serif; display: none; }
         .admin-mode .att-badge { display: none; }
         .admin-mode .att-input { display: block; }
-        
         .class-status-text { font-size: 0.65rem; margin-top: 5px; padding: 2px 6px; border-radius: 4px; display: inline-block; font-weight: 500; margin-right: 4px; }
         .class-card.active .class-status-text { background: #22c55e; color: white; }
         .class-card.soon .class-status-text { background: #f59e0b; color: white; }
         .class-card.ended .class-status-text { background: #999; color: white; }
         .class-status-text.ending { background: #ef4444 !important; color: white !important; }
-
+        .class-status-text.ended-status { background: #6b7280 !important; color: white !important; }
         .admin-controls { display: none; margin-top: 8px; gap: 6px; flex-wrap: wrap; }
         .admin-mode .admin-controls { display: flex; }
         .admin-btn { padding: 4px 10px; border: none; border-radius: 5px; font-size: 0.7rem; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
         .admin-btn.end-btn { background: #ef4444; color: white; }
         .admin-btn.activate-btn { background: #22c55e; color: white; }
-        
         .no-class { text-align: center; color: #bbb; font-size: 0.8rem; padding: 20px 8px; font-style: italic; }
         .legend { display: flex; gap: 16px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; flex-wrap: wrap; }
         .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: #666; }
@@ -113,7 +134,6 @@
         .legend-dot.dark { background: #999; }
         .legend-dot.blue { background: #3b82f6; }
         .legend-dot.red { background: #ef4444; }
-        
         .mobile-schedule { display: none; }
         .hidden-btn { position: fixed; bottom: 10px; right: 10px; width: 12px; height: 12px; background: #c41e3a; border: none; border-radius: 50%; cursor: pointer; opacity: 0.3; z-index: 100; }
         .hidden-btn:hover { opacity: 0.8; }
@@ -129,7 +149,6 @@
         .modal-btn.cancel { background: #e5e7eb; color: #333; }
         .admin-badge { display: none; position: fixed; top: 10px; right: 10px; background: #c41e3a; color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; z-index: 100; box-shadow: 0 4px 12px rgba(196, 30, 58, 0.3); }
         .admin-mode .admin-badge { display: block; }
-
         @media (max-width: 768px) {
             body { padding: 12px; }
             .header { flex-direction: column; padding: 20px; }
@@ -165,6 +184,7 @@
             .mobile-class-card.soon .mobile-class-status-text { background: #f59e0b; color: white; }
             .mobile-class-card.ended .mobile-class-status-text { background: #999; color: white; }
             .mobile-class-status-text.ending { background: #ef4444 !important; color: white !important; }
+            .mobile-class-status-text.ended-status { background: #6b7280 !important; color: white !important; }
             .mobile-no-class { text-align: center; color: #aaa; font-size: 0.8rem; padding: 16px; font-style: italic; }
             .legend { justify-content: center; }
         }
@@ -191,7 +211,7 @@
 
         <div class="announcement-box" id="announcementBox">
             <div class="announcement-header">
-                <div class="announcement-title">📢 Aviso Importante</div>
+                <div class="announcement-title"> Aviso Importante</div>
                 <button class="edit-ann-btn" onclick="toggleEditAnnouncement()">✏️ Editar</button>
             </div>
             <div class="announcement-content" id="announcementContent"></div>
@@ -203,16 +223,35 @@
 
         <div class="checkin-section">
             <div class="checkin-header">
-                <div class="checkin-title">📍 Confirmación de Asistencia</div>
+                <div class="checkin-title"> Confirmación de Asistencia</div>
                 <button class="checkin-btn" id="checkinBtn" onclick="confirmCheckin()">
                     <span id="checkinBtnText">Confirmar Llegada</span>
                 </button>
             </div>
             <div class="checkin-status" id="checkinStatus">Aún no se ha confirmado la llegada hoy</div>
+            <div class="checkin-actions" id="checkinActions">
+                <button class="checkin-action-btn edit" onclick="editCheckinTime()">✏️ Editar Hora</button>
+                <button class="checkin-action-btn remove" onclick="removeCheckin()">🗑️ Quitar Confirmación</button>
+            </div>
             <div class="checkin-history" id="checkinHistory" style="display: none;">
                 <div class="checkin-history-title">📋 Historial de Llegadas</div>
                 <div id="checkinEntries"></div>
             </div>
+        </div>
+
+        <div class="comments-section">
+            <div class="comments-header">
+                <div class="comments-title">💬 Comentarios</div>
+                <button class="add-comment-btn" onclick="toggleCommentForm()">➕ Añadir Comentario</button>
+            </div>
+            <div class="comment-form" id="commentForm">
+                <textarea id="commentInput" placeholder="Escribe un comentario..."></textarea>
+                <div class="comment-form-actions">
+                    <button class="comment-form-btn cancel" onclick="toggleCommentForm()">Cancelar</button>
+                    <button class="comment-form-btn save" onclick="saveComment()">Guardar</button>
+                </div>
+            </div>
+            <div id="commentsList"></div>
         </div>
 
         <div class="status-bar">
@@ -251,7 +290,7 @@
 
             <div class="legend">
                 <div class="legend-item"><div class="legend-dot green"></div><span>En clase ahora</span></div>
-                <div class="legend-item"><div class="legend-dot red"></div><span>Termina en &lt;5 min</span></div>
+                <div class="legend-item"><div class="legend-dot red"></div><span>Termina en &lt;25 min</span></div>
                 <div class="legend-item"><div class="legend-dot yellow"></div><span>Próxima clase</span></div>
                 <div class="legend-item"><div class="legend-dot gray"></div><span>Sin clase</span></div>
                 <div class="legend-item"><div class="legend-dot dark"></div><span>Terminada</span></div>
@@ -293,6 +332,7 @@
         const announcementsRef = database.ref('announcements/current');
         const attendanceRef = database.ref('attendance');
         const checkinRef = database.ref('checkins');
+        const commentsRef = database.ref('comments');
 
         const schedule = {
             1: [
@@ -324,6 +364,8 @@
         let attendanceData = {};
         let currentAnnouncement = "";
         let checkinData = {};
+        let commentsData = {};
+        let attUpdateTimeout = null;
 
         function toggleMessageBox() {
             document.getElementById('messageBox').classList.toggle('active');
@@ -412,7 +454,18 @@
             if (isNaN(val)) val = 0;
             if (val < 0) val = 0;
             if (val > 100) val = 100;
-            attendanceRef.child(`${dayIndex}_${classIndex}`).set(val);
+
+            if (attUpdateTimeout) clearTimeout(attUpdateTimeout);
+            attUpdateTimeout = setTimeout(() => {
+                const className = schedule[dayIndex][classIndex].name;
+                Object.keys(schedule).forEach(day => {
+                    schedule[day].forEach((cls, idx) => {
+                        if (cls.name === className) {
+                            attendanceRef.child(`${day}_${idx}`).set(val);
+                        }
+                    });
+                });
+            }, 500);
         }
 
         function toggleEditAnnouncement() {
@@ -468,6 +521,78 @@
             status.style.fontWeight = '600';
         }
 
+        function editCheckinTime() {
+            const newTime = prompt('Ingresa la nueva hora de llegada (ej: 08:30):');
+            if (newTime && /^\d{2}:\d{2}$/.test(newTime)) {
+                const today = new Date().toISOString().split('T')[0];
+                const todayCheckins = checkinData[today] || {};
+                const lastKey = Object.keys(todayCheckins).pop();
+                
+                if (lastKey) {
+                    const updatedEntry = {
+                        ...todayCheckins[lastKey],
+                        time: newTime,
+                        message: `Adrian confirmó su llegada a INACAP (editado)`
+                    };
+                    checkinRef.child(`${today}/${lastKey}`).update(updatedEntry);
+                }
+            } else if (newTime) {
+                alert('Formato inválido. Usa HH:MM (ej: 08:30)');
+            }
+        }
+
+        function removeCheckin() {
+            if (confirm('¿Seguro que quieres quitar la confirmación de llegada de hoy?')) {
+                const today = new Date().toISOString().split('T')[0];
+                checkinRef.child(today).remove();
+            }
+        }
+
+        function toggleCommentForm() {
+            const form = document.getElementById('commentForm');
+            form.classList.toggle('active');
+            if (form.classList.contains('active')) {
+                document.getElementById('commentInput').value = '';
+                document.getElementById('commentInput').focus();
+            }
+        }
+
+        function saveComment() {
+            const text = document.getElementById('commentInput').value.trim();
+            if (!text) return;
+
+            const now = new Date();
+            const comment = {
+                text: text,
+                date: now.toLocaleDateString('es-CL', { year: 'numeric', month: 'long', day: 'numeric' }),
+                time: now.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }),
+                timestamp: Date.now()
+            };
+
+            commentsRef.push(comment);
+            toggleCommentForm();
+        }
+
+        function editComment(commentId) {
+            const comment = commentsData[commentId];
+            if (!comment) return;
+
+            const newText = prompt('Editar comentario:', comment.text);
+            if (newText !== null && newText.trim()) {
+                commentsRef.child(commentId).update({
+                    text: newText.trim(),
+                    date: new Date().toLocaleDateString('es-CL', { year: 'numeric', month: 'long', day: 'numeric' }),
+                    time: new Date().toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })
+                });
+            }
+        }
+
+        function deleteComment(commentId) {
+            if (confirm('¿Seguro que quieres eliminar este comentario?')) {
+                commentsRef.child(commentId).remove();
+            }
+        }
+
         classOverridesRef.on('value', (snapshot) => {
             classOverrides = snapshot.val() || {};
             updateSchedule();
@@ -495,6 +620,11 @@
             checkinData = snapshot.val() || {};
             updateCheckinStatus();
             updateCheckinHistory();
+        });
+
+        commentsRef.on('value', (snapshot) => {
+            commentsData = snapshot.val() || {};
+            renderComments();
         });
 
         function updateCheckinStatus() {
@@ -547,6 +677,29 @@
             }
         }
 
+        function renderComments() {
+            const list = document.getElementById('commentsList');
+            const comments = Object.entries(commentsData).sort((a, b) => b[1].timestamp - a[1].timestamp);
+
+            if (comments.length === 0) {
+                list.innerHTML = '<div class="no-comments">No hay comentarios aún</div>';
+                return;
+            }
+
+            list.innerHTML = comments.map(([id, comment]) => `
+                <div class="comment-item">
+                    <div class="comment-text">${comment.text}</div>
+                    <div class="comment-meta">
+                        <div class="comment-date">${comment.date} - ${comment.time}</div>
+                        <div class="comment-actions">
+                            <button class="comment-action-btn edit" onclick="editComment('${id}')">✏️ Editar</button>
+                            <button class="comment-action-btn delete" onclick="deleteComment('${id}')">🗑️ Eliminar</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
         function getAttClass(val) {
             if (val >= 75) return 'high';
             if (val >= 50) return 'medium';
@@ -562,6 +715,7 @@
 
             let statusText = '';
             let endingText = '';
+            let endedText = '';
             let cardClass = '';
 
             if (override && override.status === 'ended') {
@@ -569,26 +723,36 @@
                 statusText = 'Terminada manualmente';
             } else if (override && override.status === 'active') {
                 cardClass = 'active';
+                const timeLeft = endMinutes - currentMinutes;
+                if (timeLeft > 0 && timeLeft <= 25) {
+                    endingText = `Termina en ${timeLeft} min`;
+                }
                 statusText = 'Reactivada manualmente';
             } else if (dayNum === dayOfWeek) {
                 if (currentMinutes >= startMinutes && currentMinutes < endMinutes) {
                     const elapsed = currentMinutes - startMinutes;
                     const timeLeft = endMinutes - currentMinutes;
                     
-                    if (timeLeft > 0 && timeLeft <= 5) {
+                    if (timeLeft > 0 && timeLeft <= 25) {
                         endingText = `Termina en ${timeLeft} min`;
                     }
                     
-                    if (elapsed >= 5 && timeLeft > 5) {
+                    if (elapsed >= 5 && timeLeft > 25) {
                         statusText = `En curso (${elapsed} min)`;
                     } else if (elapsed < 5) {
                         statusText = '¡Clase iniciada!';
                     }
                     cardClass = 'active';
+                } else if (currentMinutes >= endMinutes) {
+                    endedText = 'Clase terminada';
+                    cardClass = 'ended';
                 } else if (currentMinutes >= startMinutes - 5 && currentMinutes < startMinutes) {
                     statusText = `Comienza en ${startMinutes - currentMinutes} min`;
                     cardClass = 'soon';
                 }
+            } else if (currentMinutes >= endMinutes && dayNum < dayOfWeek) {
+                endedText = 'Clase terminada';
+                cardClass = 'ended';
             }
 
             const canEnd = cardClass === 'active' || (dayNum === dayOfWeek && currentMinutes >= startMinutes && currentMinutes < endMinutes);
@@ -607,11 +771,12 @@
                 <div class="${roomClass}">📍 ${cls.room}</div>
                 <div class="attendance-row">
                     <span class="att-badge ${getAttClass(attVal)}">Asistencia: ${attVal}%</span>
-                    <input type="number" class="att-input" min="0" max="100" value="${attVal}" onchange="updateAttendance(${dayNum}, ${classIndex}, this.value)">
+                    <input type="number" class="att-input" min="0" max="100" value="${attVal}" onblur="updateAttendance(${dayNum}, ${classIndex}, this.value)">
                 </div>
                 <div>
                     ${statusText ? `<span class="${statusClass}">${statusText}</span>` : ''}
                     ${endingText ? `<span class="${statusClass} ending">${endingText}</span>` : ''}
+                    ${endedText ? `<span class="${statusClass} ended-status">${endedText}</span>` : ''}
                 </div>
                 <div class="admin-controls">
                     ${canEnd ? `<button class="admin-btn end-btn" onclick="endClass(${dayNum}, ${classIndex})">Terminar</button>` : ''}
@@ -713,7 +878,7 @@
                 classText.textContent = `${activeClass.name} - ${activeClass.room}`;
             } else if (soonClass) {
                 indicator.className = 'status-indicator soon';
-                classText.textContent = `⏰ Próxima: ${soonClass.name} en 5 min`;
+                classText.textContent = ` Próxima: ${soonClass.name} en 5 min`;
             } else {
                 indicator.className = 'status-indicator';
                 classText.textContent = '💤 Sin clases en este momento';
