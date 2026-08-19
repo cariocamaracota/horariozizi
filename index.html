@@ -5,399 +5,154 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Horario de Clases</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
-            min-height: 100vh;
-            padding: 16px;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .header {
-            background: white;
-            border-radius: 20px;
-            padding: 24px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 16px;
-        }
-
-        .header-content h1 {
-            color: #c41e3a;
-            font-size: 1.75rem;
-            font-weight: 700;
-            margin-bottom: 6px;
-        }
-
-        .header-content p {
-            color: #666;
-            font-size: 0.95rem;
-            font-weight: 500;
-        }
-
-        .message-panel {
-            background: white;
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .message-panel textarea {
-            width: 100%;
-            padding: 14px;
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            font-size: 16px;
-            font-family: 'Inter', sans-serif;
-            resize: vertical;
-            min-height: 90px;
-            transition: border-color 0.3s ease;
-        }
-
-        .message-panel textarea:focus {
-            outline: none;
-            border-color: #c41e3a;
-        }
-
-        .send-btn {
-            padding: 14px 24px;
-            background: linear-gradient(135deg, #c41e3a 0%, #a01830 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Inter', sans-serif;
-            align-self: flex-end;
-            width: 100%;
-        }
-
-        .send-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(196, 30, 58, 0.3);
-        }
-
-        .send-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .cooldown-text {
-            font-size: 0.85rem;
-            color: #666;
-            text-align: center;
-            font-weight: 500;
-            min-height: 20px;
-        }
-
-        .status-bar {
-            background: white;
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-
-        .current-time {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .current-class {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.95rem;
-            color: #555;
-            flex: 1;
-        }
-
-        .status-indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #ccc;
-            transition: all 0.3s ease;
-            flex-shrink: 0;
-        }
-
-        .status-indicator.active {
-            background: #22c55e;
-            box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
-            animation: pulse 2s infinite;
-        }
-
-        .status-indicator.soon {
-            background: #f59e0b;
-            box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.2); opacity: 0.8; }
-        }
-
-        .schedule-grid {
-            background: white;
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            overflow-x: auto;
-        }
-
-        .schedule-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 8px;
-            min-width: 900px;
-        }
-
-        .schedule-table th {
-            background: linear-gradient(135deg, #c41e3a 0%, #a01830 100%);
-            color: white;
-            padding: 16px 12px;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            text-align: center;
-        }
-
-        .schedule-table th .date {
-            font-size: 0.75rem;
-            font-weight: 400;
-            opacity: 0.9;
-            margin-top: 4px;
-        }
-
-        .schedule-table td {
-            padding: 12px;
-            vertical-align: top;
-        }
-
-        .class-card {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 14px;
-            margin-bottom: 8px;
-            border-left: 4px solid #ddd;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .class-card.active {
-            border-left-color: #22c55e;
-            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.2);
-        }
-
-        .class-card.soon {
-            border-left-color: #f59e0b;
-            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-        }
-
-        .class-card .status-dot {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #ddd;
-        }
-
-        .class-card.active .status-dot {
-            background: #22c55e;
-            box-shadow: 0 0 8px rgba(34, 197, 94, 0.6);
-            animation: pulse 2s infinite;
-        }
-
-        .class-card.soon .status-dot {
-            background: #f59e0b;
-            box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
-        }
-
-        .class-name {
-            font-weight: 600;
-            color: #333;
-            font-size: 0.85rem;
-            margin-bottom: 6px;
-            padding-right: 20px;
-        }
-
-        .class-time {
-            font-size: 0.75rem;
-            color: #666;
-            margin-bottom: 4px;
-        }
-
-        .class-room {
-            font-size: 0.75rem;
-            color: #c41e3a;
-            font-weight: 500;
-        }
-
-        .class-status-text {
-            font-size: 0.7rem;
-            margin-top: 6px;
-            padding: 3px 8px;
-            border-radius: 6px;
-            display: inline-block;
-            font-weight: 500;
-        }
-
-        .class-card.active .class-status-text {
-            background: #22c55e;
-            color: white;
-        }
-
-        .class-card.soon .class-status-text {
-            background: #f59e0b;
-            color: white;
-        }
-
-        .no-class {
-            text-align: center;
-            color: #aaa;
-            font-size: 0.85rem;
-            padding: 24px 12px;
-            font-style: italic;
-        }
-
-        .legend {
-            display: flex;
-            gap: 16px;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-            flex-wrap: wrap;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.8rem;
-            color: #666;
-        }
-
-        .legend-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%); min-height: 100vh; padding: 16px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header { background: white; border-radius: 20px; padding: 24px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+        .header-content h1 { color: #c41e3a; font-size: 1.75rem; font-weight: 700; margin-bottom: 6px; }
+        .header-content p { color: #666; font-size: 0.95rem; font-weight: 500; }
+        .message-section { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; min-width: 250px; }
+        .send-btn { padding: 12px 24px; background: linear-gradient(135deg, #c41e3a 0%, #a01830 100%); color: white; border: none; border-radius: 12px; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: all 0.3s ease; font-family: 'Inter', sans-serif; display: flex; align-items: center; gap: 8px; }
+        .send-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(196, 30, 58, 0.3); }
+        .message-box { width: 100%; max-height: 0; overflow: hidden; transition: max-height 0.4s ease, opacity 0.3s ease; opacity: 0; display: flex; flex-direction: column; gap: 10px; }
+        .message-box.active { max-height: 200px; opacity: 1; }
+        .message-box textarea { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 15px; font-family: 'Inter', sans-serif; resize: none; height: 80px; }
+        .message-box textarea:focus { outline: none; border-color: #c41e3a; }
+        .message-actions { display: flex; justify-content: space-between; align-items: center; }
+        .send-now-btn { padding: 8px 16px; background: #22c55e; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
+        .send-now-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .cooldown-text { font-size: 0.8rem; color: #666; font-weight: 500; }
+        .announcement-box { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 1px solid #fde68a; border-radius: 16px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(253, 230, 138, 0.3); display: none; }
+        .announcement-box.visible { display: block; }
+        .announcement-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .announcement-title { font-weight: 700; color: #92400e; font-size: 0.9rem; text-transform: uppercase; }
+        .edit-ann-btn { padding: 6px 12px; background: #c41e3a; color: white; border: none; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; display: none; font-family: 'Inter', sans-serif; }
+        .admin-mode .edit-ann-btn { display: block; }
+        .announcement-content { color: #78350f; font-size: 1rem; line-height: 1.5; white-space: pre-wrap; }
+        .announcement-edit-area { display: none; width: 100%; }
+        .announcement-edit-area textarea { width: 100%; padding: 12px; border: 2px solid #fde68a; border-radius: 10px; font-size: 1rem; font-family: 'Inter', sans-serif; min-height: 80px; resize: vertical; }
+        .announcement-edit-area textarea:focus { outline: none; border-color: #c41e3a; }
+        .save-ann-btn { margin-top: 10px; padding: 8px 16px; background: #22c55e; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
+        .checkin-section { background: white; border-radius: 16px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); display: flex; flex-direction: column; gap: 12px; }
+        .checkin-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .checkin-title { font-weight: 700; color: #333; font-size: 1rem; }
+        .checkin-btn { padding: 10px 20px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 10px; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease; font-family: 'Inter', sans-serif; display: flex; align-items: center; gap: 8px; }
+        .checkin-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+        .checkin-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .checkin-btn.checked { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); }
+        .checkin-status { font-size: 0.85rem; color: #666; font-weight: 500; }
+        .checkin-history { margin-top: 10px; padding-top: 15px; border-top: 1px solid #eee; }
+        .checkin-history-title { font-size: 0.85rem; font-weight: 600; color: #666; margin-bottom: 10px; }
+        .checkin-entry { background: #f8f9fa; border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; border-left: 3px solid #3b82f6; font-size: 0.8rem; }
+        .checkin-entry .time { font-weight: 600; color: #333; }
+        .checkin-entry .date { color: #666; font-size: 0.75rem; }
+        .status-bar { background: white; border-radius: 16px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+        .current-time { font-size: 1.5rem; font-weight: 600; color: #333; }
+        .current-class { display: flex; align-items: center; gap: 10px; font-size: 0.95rem; color: #555; flex: 1; }
+        .status-indicator { width: 12px; height: 12px; border-radius: 50%; background: #ccc; transition: all 0.3s ease; flex-shrink: 0; }
+        .status-indicator.active { background: #22c55e; box-shadow: 0 0 10px rgba(34, 197, 94, 0.5); animation: pulse 2s infinite; }
+        .status-indicator.soon { background: #f59e0b; box-shadow: 0 0 10px rgba(245, 158, 11, 0.5); }
+        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.2); opacity: 0.8; } }
+        .schedule-grid { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .schedule-table { width: 100%; border-collapse: separate; border-spacing: 4px; }
+        .schedule-table th { background: linear-gradient(135deg, #c41e3a 0%, #a01830 100%); color: white; padding: 12px 8px; border-radius: 10px; font-weight: 600; font-size: 0.85rem; text-align: center; position: relative; }
+        .schedule-table th.today { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+        .today-indicator { display: none; width: 8px; height: 8px; background: #60a5fa; border-radius: 50%; margin: 0 auto; margin-top: 4px; box-shadow: 0 0 6px rgba(96, 165, 250, 0.8); animation: pulse 2s infinite; }
+        .schedule-table th.today .today-indicator { display: block; background: white; }
+        .schedule-table th .date { font-size: 0.7rem; font-weight: 400; opacity: 0.9; margin-top: 3px; }
+        .schedule-table td { padding: 8px; vertical-align: top; background: #fafafa; border-radius: 8px; }
+        .class-card { background: white; border-radius: 10px; padding: 12px; margin-bottom: 6px; border-left: 3px solid #ddd; transition: all 0.3s ease; position: relative; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .class-card:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .class-card.active { border-left-color: #22c55e; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); box-shadow: 0 2px 10px rgba(34, 197, 94, 0.15); }
+        .class-card.soon { border-left-color: #f59e0b; background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); }
+        .class-card.ended { border-left-color: #999; background: #f5f5f5; opacity: 0.7; }
+        .class-card .status-dot { position: absolute; top: 10px; right: 10px; width: 8px; height: 8px; border-radius: 50%; background: #ddd; }
+        .class-card.active .status-dot { background: #22c55e; box-shadow: 0 0 6px rgba(34, 197, 94, 0.6); animation: pulse 2s infinite; }
+        .class-card.soon .status-dot { background: #f59e0b; box-shadow: 0 0 6px rgba(245, 158, 11, 0.6); }
+        .class-card.ended .status-dot { background: #999; }
+        .class-name { font-weight: 600; color: #333; font-size: 0.8rem; margin-bottom: 5px; padding-right: 18px; line-height: 1.3; }
+        .class-time { font-size: 0.7rem; color: #666; margin-bottom: 3px; }
+        .class-room { font-size: 0.7rem; color: #c41e3a; font-weight: 500; }
+        .attendance-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+        .att-badge { font-size: 0.7rem; font-weight: 600; padding: 3px 8px; border-radius: 6px; background: #f3f4f6; color: #4b5563; }
+        .att-badge.high { background: #dcfce7; color: #166534; }
+        .att-badge.medium { background: #fef3c7; color: #92400e; }
+        .att-badge.low { background: #fee2e2; color: #991b1b; }
+        .att-input { width: 50px; padding: 3px 6px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.7rem; font-family: 'Inter', sans-serif; display: none; }
+        .admin-mode .att-badge { display: none; }
+        .admin-mode .att-input { display: block; }
+        .class-status-text { font-size: 0.65rem; margin-top: 5px; padding: 2px 6px; border-radius: 4px; display: inline-block; font-weight: 500; }
+        .class-card.active .class-status-text { background: #22c55e; color: white; }
+        .class-card.soon .class-status-text { background: #f59e0b; color: white; }
+        .class-card.ended .class-status-text { background: #999; color: white; }
+        .admin-controls { display: none; margin-top: 8px; gap: 6px; flex-wrap: wrap; }
+        .admin-mode .admin-controls { display: flex; }
+        .admin-btn { padding: 4px 10px; border: none; border-radius: 5px; font-size: 0.7rem; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
+        .admin-btn.end-btn { background: #ef4444; color: white; }
+        .admin-btn.activate-btn { background: #22c55e; color: white; }
+        .no-class { text-align: center; color: #bbb; font-size: 0.8rem; padding: 20px 8px; font-style: italic; }
+        .legend { display: flex; gap: 16px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; flex-wrap: wrap; }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: #666; }
+        .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
         .legend-dot.green { background: #22c55e; }
         .legend-dot.yellow { background: #f59e0b; }
         .legend-dot.gray { background: #ddd; }
-
+        .legend-dot.dark { background: #999; }
+        .legend-dot.blue { background: #3b82f6; }
+        .mobile-schedule { display: none; }
+        .hidden-btn { position: fixed; bottom: 10px; right: 10px; width: 12px; height: 12px; background: #c41e3a; border: none; border-radius: 50%; cursor: pointer; opacity: 0.3; z-index: 100; }
+        .hidden-btn:hover { opacity: 0.8; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: white; border-radius: 16px; padding: 30px; max-width: 400px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+        .modal h3 { color: #c41e3a; margin-bottom: 20px; font-size: 1.2rem; }
+        .modal input { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 1rem; margin-bottom: 15px; font-family: 'Inter', sans-serif; }
+        .modal input:focus { outline: none; border-color: #c41e3a; }
+        .modal-buttons { display: flex; gap: 10px; }
+        .modal-btn { flex: 1; padding: 12px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
+        .modal-btn.confirm { background: #c41e3a; color: white; }
+        .modal-btn.cancel { background: #e5e7eb; color: #333; }
+        .admin-badge { display: none; position: fixed; top: 10px; right: 10px; background: #c41e3a; color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; z-index: 100; box-shadow: 0 4px 12px rgba(196, 30, 58, 0.3); }
+        .admin-mode .admin-badge { display: block; }
         @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                text-align: center;
-                padding: 20px;
-            }
-            
-            .header-content h1 {
-                font-size: 1.5rem;
-            }
-
-            .status-bar {
-                flex-direction: column;
-                text-align: center;
-                padding: 16px;
-            }
-
-            .current-class {
-                justify-content: center;
-            }
-
-            .schedule-grid {
-                padding: 16px;
-            }
-
-            .schedule-table {
-                min-width: 100%;
-                border-spacing: 0;
-                display: block;
-            }
-
-            .schedule-table thead {
-                display: none;
-            }
-
-            .schedule-table tbody {
-                display: block;
-            }
-
-            .schedule-table tr {
-                display: block;
-                margin-bottom: 16px;
-                background: #f8f9fa;
-                border-radius: 12px;
-                overflow: hidden;
-            }
-
-            .schedule-table td {
-                display: block;
-                width: 100%;
-                padding: 16px;
-                border-bottom: 1px solid #eee;
-                position: relative;
-                padding-top: 40px;
-            }
-
-            .schedule-table td:last-child {
-                border-bottom: none;
-            }
-
-            .schedule-table td::before {
-                content: attr(data-day);
-                position: absolute;
-                top: 12px;
-                left: 16px;
-                font-weight: 700;
-                color: #c41e3a;
-                font-size: 0.85rem;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-            }
-
-            .schedule-table td .no-class {
-                padding: 16px;
-                text-align: left;
-                padding-top: 0;
-            }
-
-            .legend {
-                justify-content: center;
-            }
+            body { padding: 12px; }
+            .header { flex-direction: column; padding: 20px; }
+            .header-content h1 { font-size: 1.4rem; }
+            .message-section { width: 100%; align-items: stretch; }
+            .status-bar { flex-direction: column; text-align: center; padding: 16px; }
+            .current-class { justify-content: center; }
+            .schedule-grid { padding: 16px; }
+            .schedule-table { display: none; }
+            .mobile-schedule { display: block; }
+            .day-card { background: #f8f9fa; border-radius: 12px; padding: 12px; margin-bottom: 10px; }
+            .day-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb; }
+            .day-header.today { border-bottom-color: #3b82f6; }
+            .day-name { font-weight: 700; color: #c41e3a; font-size: 0.9rem; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+            .day-name.today { color: #3b82f6; }
+            .day-name .today-dot { display: none; width: 8px; height: 8px; background: #3b82f6; border-radius: 50%; animation: pulse 2s infinite; }
+            .day-name.today .today-dot { display: inline-block; }
+            .day-date { font-size: 0.75rem; color: #666; font-weight: 500; }
+            .day-classes { display: flex; flex-direction: column; gap: 8px; }
+            .mobile-class-card { background: white; border-radius: 8px; padding: 10px; border-left: 3px solid #ddd; position: relative; }
+            .mobile-class-card.active { border-left-color: #22c55e; background: #f0fdf4; }
+            .mobile-class-card.soon { border-left-color: #f59e0b; background: #fffbeb; }
+            .mobile-class-card.ended { border-left-color: #999; background: #f5f5f5; opacity: 0.7; }
+            .mobile-class-card .status-dot { position: absolute; top: 10px; right: 10px; width: 8px; height: 8px; border-radius: 50%; background: #ddd; }
+            .mobile-class-card.active .status-dot { background: #22c55e; animation: pulse 2s infinite; }
+            .mobile-class-card.soon .status-dot { background: #f59e0b; }
+            .mobile-class-card.ended .status-dot { background: #999; }
+            .mobile-class-name { font-weight: 600; color: #333; font-size: 0.8rem; margin-bottom: 4px; padding-right: 16px; }
+            .mobile-class-time { font-size: 0.7rem; color: #666; margin-bottom: 3px; }
+            .mobile-class-room { font-size: 0.7rem; color: #c41e3a; font-weight: 500; }
+            .mobile-class-status-text { font-size: 0.65rem; margin-top: 4px; padding: 2px 6px; border-radius: 4px; display: inline-block; font-weight: 500; }
+            .mobile-class-card.active .mobile-class-status-text { background: #22c55e; color: white; }
+            .mobile-class-card.soon .mobile-class-status-text { background: #f59e0b; color: white; }
+            .mobile-class-card.ended .mobile-class-status-text { background: #999; color: white; }
+            .mobile-no-class { text-align: center; color: #aaa; font-size: 0.8rem; padding: 16px; font-style: italic; }
+            .legend { justify-content: center; }
         }
     </style>
 </head>
@@ -408,12 +163,42 @@
                 <h1>📚 Mi Horario de Clases</h1>
                 <p>Materias</p>
             </div>
+            <div class="message-section">
+                <button class="send-btn" id="mainSendBtn" onclick="toggleMessageBox()">📤 Enviar Mensaje</button>
+                <div class="message-box" id="messageBox">
+                    <textarea id="customMessage" placeholder="Escribe tu mensaje aquí..."></textarea>
+                    <div class="message-actions">
+                        <button class="send-now-btn" id="sendNowBtn" onclick="sendWebhookMessage()">Mandar</button>
+                        <div class="cooldown-text" id="cooldownText"></div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="message-panel">
-            <textarea id="customMessage" placeholder="Escribe tu mensaje aquí..."></textarea>
-            <button class="send-btn" id="sendBtn" onclick="sendWebhookMessage()">📤 Enviar Mensaje</button>
-            <div class="cooldown-text" id="cooldownText"></div>
+        <div class="announcement-box" id="announcementBox">
+            <div class="announcement-header">
+                <div class="announcement-title">📢 Aviso Importante</div>
+                <button class="edit-ann-btn" onclick="toggleEditAnnouncement()">✏️ Editar</button>
+            </div>
+            <div class="announcement-content" id="announcementContent"></div>
+            <div class="announcement-edit-area" id="announcementEditArea">
+                <textarea id="announcementInput" placeholder="Escribe el aviso aquí..."></textarea>
+                <button class="save-ann-btn" onclick="saveAnnouncement()">💾 Guardar Aviso</button>
+            </div>
+        </div>
+
+        <div class="checkin-section">
+            <div class="checkin-header">
+                <div class="checkin-title">📍 Confirmación de Asistencia</div>
+                <button class="checkin-btn" id="checkinBtn" onclick="confirmCheckin()">
+                    <span id="checkinBtnText">Confirmar Llegada</span>
+                </button>
+            </div>
+            <div class="checkin-status" id="checkinStatus">Aún no has confirmado tu llegada hoy</div>
+            <div class="checkin-history" id="checkinHistory" style="display: none;">
+                <div class="checkin-history-title">📋 Historial de Llegadas</div>
+                <div id="checkinEntries"></div>
+            </div>
         </div>
 
         <div class="status-bar">
@@ -428,45 +213,71 @@
             <table class="schedule-table">
                 <thead>
                     <tr>
-                        <th>LUNES<div class="date" id="date-lunes">--</div></th>
-                        <th>MARTES<div class="date" id="date-martes">--</div></th>
-                        <th>MIÉRCOLES<div class="date" id="date-miercoles">--</div></th>
-                        <th>JUEVES<div class="date" id="date-jueves">--</div></th>
-                        <th>VIERNES<div class="date" id="date-viernes">--</div></th>
-                        <th>SÁBADO<div class="date" id="date-sabado">--</div></th>
+                        <th id="th-lunes">LUNES<div class="date" id="date-lunes">--</div><div class="today-indicator"></div></th>
+                        <th id="th-martes">MARTES<div class="date" id="date-martes">--</div><div class="today-indicator"></div></th>
+                        <th id="th-miercoles">MIÉRCOLES<div class="date" id="date-miercoles">--</div><div class="today-indicator"></div></th>
+                        <th id="th-jueves">JUEVES<div class="date" id="date-jueves">--</div><div class="today-indicator"></div></th>
+                        <th id="th-viernes">VIERNES<div class="date" id="date-viernes">--</div><div class="today-indicator"></div></th>
+                        <th id="th-sabado">SÁBADO<div class="date" id="date-sabado">--</div><div class="today-indicator"></div></th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td id="lunes" data-day="LUNES"></td>
-                        <td id="martes" data-day="MARTES"></td>
-                        <td id="miercoles" data-day="MIÉRCOLES"></td>
-                        <td id="jueves" data-day="JUEVES"></td>
-                        <td id="viernes" data-day="VIERNES"></td>
-                        <td id="sabado" data-day="SÁBADO"></td>
+                        <td id="lunes"></td>
+                        <td id="martes"></td>
+                        <td id="miercoles"></td>
+                        <td id="jueves"></td>
+                        <td id="viernes"></td>
+                        <td id="sabado"></td>
                     </tr>
                 </tbody>
             </table>
 
+            <div class="mobile-schedule" id="mobileSchedule"></div>
+
             <div class="legend">
-                <div class="legend-item">
-                    <div class="legend-dot green"></div>
-                    <span>En clase ahora</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-dot yellow"></div>
-                    <span>Próxima clase (en menos de 5 min)</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-dot gray"></div>
-                    <span>Sin clase</span>
-                </div>
+                <div class="legend-item"><div class="legend-dot green"></div><span>En clase ahora</span></div>
+                <div class="legend-item"><div class="legend-dot yellow"></div><span>Próxima clase</span></div>
+                <div class="legend-item"><div class="legend-dot gray"></div><span>Sin clase</span></div>
+                <div class="legend-item"><div class="legend-dot dark"></div><span>Terminada</span></div>
+                <div class="legend-item"><div class="legend-dot blue"></div><span>Día actual</span></div>
+            </div>
+        </div>
+    </div>
+
+    <button class="hidden-btn" onclick="showPasswordModal()"></button>
+    <div class="admin-badge">🔓 MODO ADMIN</div>
+
+    <div class="modal-overlay" id="passwordModal">
+        <div class="modal">
+            <h3>🔐 Ingresar Contraseña</h3>
+            <input type="password" id="passwordInput" placeholder="Contraseña" onkeypress="if(event.key==='Enter')checkPassword()">
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" onclick="closePasswordModal()">Cancelar</button>
+                <button class="modal-btn confirm" onclick="checkPassword()">Confirmar</button>
             </div>
         </div>
     </div>
 
     <script>
         const WEBHOOK_URL = "https://discord.com/api/webhooks/1539354611788546190/5f-y-m4G8C4RK86psviZ-UbyIMwe_5UIrdX-FeCFdGrIdmIA87XPK5Ou_j_5TvBnduyr";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDWCtTHnhheAoMA5Ug4uz5Iym0ZKIGPuAk",
+            authDomain: "horario-adriansito.firebaseapp.com",
+            databaseURL: "https://horario-adriansito-default-rtdb.firebaseio.com",
+            projectId: "horario-adriansito",
+            storageBucket: "horario-adriansito.firebasestorage.app",
+            messagingSenderId: "285110233283",
+            appId: "1:285110233283:web:dfddc05b5d1415b0331a76"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const classOverridesRef = database.ref('classOverrides');
+        const announcementsRef = database.ref('announcements/current');
+        const attendanceRef = database.ref('attendance');
+        const checkinRef = database.ref('checkins');
 
         const schedule = {
             1: [
@@ -493,6 +304,18 @@
 
         let lastMessageTime = 0;
         const COOLDOWN = 300;
+        let isAdmin = false;
+        let classOverrides = {};
+        let attendanceData = {};
+        let currentAnnouncement = "";
+        let checkinData = {};
+
+        function toggleMessageBox() {
+            document.getElementById('messageBox').classList.toggle('active');
+            if (document.getElementById('messageBox').classList.contains('active')) {
+                setTimeout(() => document.getElementById('customMessage').focus(), 100);
+            }
+        }
 
         function updateWeekDates() {
             const today = new Date();
@@ -502,13 +325,23 @@
             monday.setDate(diffToMonday);
             
             const days = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+            const todayIndex = currentDay === 0 ? 6 : currentDay - 1;
+            
             days.forEach((day, index) => {
                 const d = new Date(monday);
                 d.setDate(monday.getDate() + index);
                 const dayStr = String(d.getDate()).padStart(2, '0');
                 const monthStr = String(d.getMonth() + 1).padStart(2, '0');
                 const yearStr = d.getFullYear();
-                document.getElementById(`date-${day}`).textContent = `${dayStr}-${monthStr}-${yearStr}`;
+                const formattedDate = `${dayStr}-${monthStr}-${yearStr}`;
+                document.getElementById(`date-${day}`).textContent = formattedDate;
+                
+                const th = document.getElementById(`th-${day}`);
+                if (index === todayIndex) {
+                    th.classList.add('today');
+                } else {
+                    th.classList.remove('today');
+                }
             });
         }
 
@@ -522,15 +355,254 @@
             return now.getHours() * 60 + now.getMinutes();
         }
 
+        function showPasswordModal() {
+            document.getElementById('passwordModal').classList.add('active');
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('passwordInput').focus();
+        }
+
+        function closePasswordModal() {
+            document.getElementById('passwordModal').classList.remove('active');
+        }
+
+        function checkPassword() {
+            const password = document.getElementById('passwordInput').value;
+            if (password === '12345') {
+                isAdmin = true;
+                document.body.classList.add('admin-mode');
+                closePasswordModal();
+                updateSchedule();
+            } else {
+                alert('Contraseña incorrecta');
+            }
+        }
+
+        function endClass(dayIndex, classIndex) {
+            classOverridesRef.child(`${dayIndex}_${classIndex}`).set({ status: 'ended', timestamp: Date.now() });
+        }
+
+        function activateClass(dayIndex, classIndex) {
+            const currentMinutes = getCurrentTimeInMinutes();
+            const cls = schedule[dayIndex][classIndex];
+            const endMinutes = timeToMinutes(cls.end);
+            if (currentMinutes >= endMinutes) {
+                alert('No se puede reactivar: la hora ya terminó');
+                return;
+            }
+            classOverridesRef.child(`${dayIndex}_${classIndex}`).set({ status: 'active', timestamp: Date.now() });
+        }
+
+        function updateAttendance(dayIndex, classIndex, value) {
+            let val = parseInt(value);
+            if (isNaN(val)) val = 0;
+            if (val < 0) val = 0;
+            if (val > 100) val = 100;
+            attendanceRef.child(`${dayIndex}_${classIndex}`).set(val);
+        }
+
+        function toggleEditAnnouncement() {
+            const editArea = document.getElementById('announcementEditArea');
+            const content = document.getElementById('announcementContent');
+            const input = document.getElementById('announcementInput');
+            
+            if (editArea.style.display === 'block') {
+                editArea.style.display = 'none';
+                content.style.display = 'block';
+            } else {
+                input.value = currentAnnouncement;
+                editArea.style.display = 'block';
+                content.style.display = 'none';
+                input.focus();
+            }
+        }
+
+        function saveAnnouncement() {
+            const text = document.getElementById('announcementInput').value.trim();
+            announcementsRef.set(text);
+            toggleEditAnnouncement();
+        }
+
+        function confirmCheckin() {
+            const btn = document.getElementById('checkinBtn');
+            const btnText = document.getElementById('checkinBtnText');
+            const status = document.getElementById('checkinStatus');
+            
+            if (btn.classList.contains('checked')) {
+                status.textContent = 'Ya confirmaste tu llegada hoy';
+                return;
+            }
+
+            const now = new Date();
+            const checkinTime = now.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+            const checkinDate = now.toLocaleDateString('es-CL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            
+            const checkinEntry = {
+                time: checkinTime,
+                date: checkinDate,
+                timestamp: Date.now(),
+                message: `Adriansito confirmó su llegada a INACAP`
+            };
+
+            const todayKey = now.toISOString().split('T')[0];
+            checkinRef.child(todayKey).push(checkinEntry);
+
+            btn.classList.add('checked');
+            btnText.textContent = '✅ Llegada Confirmada';
+            status.textContent = `Confirmado a las ${checkinTime} - ¡Buenas clases!`;
+            status.style.color = '#22c55e';
+            status.style.fontWeight = '600';
+        }
+
+        classOverridesRef.on('value', (snapshot) => {
+            classOverrides = snapshot.val() || {};
+            updateSchedule();
+        });
+
+        attendanceRef.on('value', (snapshot) => {
+            attendanceData = snapshot.val() || {};
+            updateSchedule();
+        });
+
+        announcementsRef.on('value', (snapshot) => {
+            currentAnnouncement = snapshot.val() || "";
+            const box = document.getElementById('announcementBox');
+            const content = document.getElementById('announcementContent');
+            
+            if (currentAnnouncement) {
+                box.classList.add('visible');
+                content.textContent = currentAnnouncement;
+            } else {
+                box.classList.remove('visible');
+            }
+        });
+
+        checkinRef.on('value', (snapshot) => {
+            checkinData = snapshot.val() || {};
+            updateCheckinStatus();
+            updateCheckinHistory();
+        });
+
+        function updateCheckinStatus() {
+            const today = new Date().toISOString().split('T')[0];
+            const todayCheckins = checkinData[today] || {};
+            const hasCheckedIn = Object.keys(todayCheckins).length > 0;
+            
+            const btn = document.getElementById('checkinBtn');
+            const btnText = document.getElementById('checkinBtnText');
+            const status = document.getElementById('checkinStatus');
+
+            if (hasCheckedIn) {
+                btn.classList.add('checked');
+                btnText.textContent = '✅ Llegada Confirmada';
+                const lastCheckin = Object.values(todayCheckins).pop();
+                status.textContent = `Confirmado a las ${lastCheckin.time} - ¡Buenas clases!`;
+                status.style.color = '#22c55e';
+                status.style.fontWeight = '600';
+            } else {
+                btn.classList.remove('checked');
+                btnText.textContent = 'Confirmar Llegada';
+                status.textContent = 'Aún no has confirmado tu llegada hoy';
+                status.style.color = '#666';
+                status.style.fontWeight = '500';
+            }
+        }
+
+        function updateCheckinHistory() {
+            const historyDiv = document.getElementById('checkinHistory');
+            const entriesDiv = document.getElementById('checkinEntries');
+            const allEntries = [];
+
+            Object.keys(checkinData).sort().reverse().forEach(date => {
+                const dayCheckins = checkinData[date];
+                Object.values(dayCheckins).forEach(entry => {
+                    allEntries.push({ date, ...entry });
+                });
+            });
+
+            if (allEntries.length > 0) {
+                historyDiv.style.display = 'block';
+                entriesDiv.innerHTML = allEntries.slice(0, 10).map(entry => `
+                    <div class="checkin-entry">
+                        <div class="time">${entry.message}</div>
+                        <div class="date">${entry.date} a las ${entry.time}</div>
+                    </div>
+                `).join('');
+            } else {
+                historyDiv.style.display = 'none';
+            }
+        }
+
+        function getAttClass(val) {
+            if (val >= 75) return 'high';
+            if (val >= 50) return 'medium';
+            return 'low';
+        }
+
+        function createClassCard(cls, dayNum, classIndex, currentMinutes, dayOfWeek, isMobile) {
+            const startMinutes = timeToMinutes(cls.start);
+            const endMinutes = timeToMinutes(cls.end);
+            const overrideKey = `${dayNum}_${classIndex}`;
+            const override = classOverrides[overrideKey];
+            const attVal = attendanceData[overrideKey] !== undefined ? attendanceData[overrideKey] : 0;
+
+            let statusText = '';
+            let cardClass = '';
+
+            if (override && override.status === 'ended') {
+                cardClass = 'ended';
+                statusText = 'Terminada manualmente';
+            } else if (override && override.status === 'active') {
+                cardClass = 'active';
+                statusText = 'Reactivada manualmente';
+            } else if (dayNum === dayOfWeek) {
+                if (currentMinutes >= startMinutes && currentMinutes < endMinutes) {
+                    const elapsed = currentMinutes - startMinutes;
+                    statusText = elapsed >= 5 ? `En curso (${elapsed} min)` : '¡Clase iniciada!';
+                    cardClass = 'active';
+                } else if (currentMinutes >= startMinutes - 5 && currentMinutes < startMinutes) {
+                    statusText = `Comienza en ${startMinutes - currentMinutes} min`;
+                    cardClass = 'soon';
+                }
+            }
+
+            const canEnd = cardClass === 'active' || (dayNum === dayOfWeek && currentMinutes >= startMinutes && currentMinutes < endMinutes);
+            const canActivate = cardClass === 'ended' && currentMinutes < endMinutes;
+
+            const nameClass = isMobile ? 'mobile-class-name' : 'class-name';
+            const timeClass = isMobile ? 'mobile-class-time' : 'class-time';
+            const roomClass = isMobile ? 'mobile-class-room' : 'class-room';
+            const statusClass = isMobile ? 'mobile-class-status-text' : 'class-status-text';
+            const cardBaseClass = isMobile ? 'mobile-class-card' : 'class-card';
+
+            let html = `
+                <div class="status-dot"></div>
+                <div class="${nameClass}">${cls.name}</div>
+                <div class="${timeClass}">🕐 ${cls.start} - ${cls.end}</div>
+                <div class="${roomClass}">📍 ${cls.room}</div>
+                <div class="attendance-row">
+                    <span class="att-badge ${getAttClass(attVal)}">Asistencia: ${attVal}%</span>
+                    <input type="number" class="att-input" min="0" max="100" value="${attVal}" onchange="updateAttendance(${dayNum}, ${classIndex}, this.value)">
+                </div>
+                ${statusText ? `<div class="${statusClass}">${statusText}</div>` : ''}
+                <div class="admin-controls">
+                    ${canEnd ? `<button class="admin-btn end-btn" onclick="endClass(${dayNum}, ${classIndex})">Terminar</button>` : ''}
+                    ${canActivate ? `<button class="admin-btn activate-btn" onclick="activateClass(${dayNum}, ${classIndex})">Reactivar</button>` : ''}
+                </div>
+            `;
+
+            const card = document.createElement('div');
+            card.className = `${cardBaseClass} ${cardClass}`;
+            card.innerHTML = html;
+            return card;
+        }
+
         function updateSchedule() {
             updateWeekDates();
-            
             const now = new Date();
             const currentMinutes = getCurrentTimeInMinutes();
             const dayOfWeek = now.getDay();
 
-            document.getElementById('currentTime').textContent = 
-                now.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            document.getElementById('currentTime').textContent = now.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
             let activeClass = null;
             let soonClass = null;
@@ -544,10 +616,10 @@
                 { id: 'sabado', label: 'SÁBADO' }
             ];
 
-            daysMap.forEach((dayObj, index) => {
-                const dayElement = document.getElementById(dayObj.id);
-                dayElement.setAttribute('data-day', dayObj.label);
-                dayElement.innerHTML = '<div class="no-class">Sin clases</div>';
+            const todayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+
+            daysMap.forEach((dayObj) => {
+                document.getElementById(dayObj.id).innerHTML = '<div class="no-class">Sin clases</div>';
             });
 
             for (let day = 1; day <= 6; day++) {
@@ -557,45 +629,52 @@
 
                 if (classes && classes.length > 0) {
                     dayElement.innerHTML = '';
-                    classes.forEach((cls) => {
-                        const startMinutes = timeToMinutes(cls.start);
-                        const endMinutes = timeToMinutes(cls.end);
-                        
-                        let statusText = '';
-                        let cardClass = '';
-
-                        if (day === dayOfWeek) {
-                            if (currentMinutes >= startMinutes && currentMinutes < endMinutes) {
-                                const elapsed = currentMinutes - startMinutes;
-                                if (elapsed >= 5) {
-                                    statusText = `En curso (${elapsed} min)`;
-                                    cardClass = 'active';
-                                    activeClass = cls;
-                                } else {
-                                    statusText = '¡Clase iniciada!';
-                                    cardClass = 'active';
-                                    activeClass = cls;
-                                }
-                            } else if (currentMinutes >= startMinutes - 5 && currentMinutes < startMinutes) {
-                                statusText = `Comienza en ${startMinutes - currentMinutes} min`;
-                                cardClass = 'soon';
-                                soonClass = cls;
-                            }
-                        }
-
-                        const card = document.createElement('div');
-                        card.className = `class-card ${cardClass}`;
-                        card.innerHTML = `
-                            <div class="status-dot"></div>
-                            <div class="class-name">${cls.name}</div>
-                            <div class="class-time">🕐 ${cls.start} - ${cls.end}</div>
-                            <div class="class-room">📍 ${cls.room}</div>
-                            ${statusText ? `<div class="class-status-text">${statusText}</div>` : ''}
-                        `;
+                    classes.forEach((cls, classIndex) => {
+                        const card = createClassCard(cls, day, classIndex, currentMinutes, dayOfWeek, false);
                         dayElement.appendChild(card);
+
+                        if (card.classList.contains('active') && !activeClass) activeClass = cls;
+                        if (card.classList.contains('soon') && !soonClass) soonClass = cls;
                     });
                 }
             }
+
+            const mobileSchedule = document.getElementById('mobileSchedule');
+            mobileSchedule.innerHTML = '';
+
+            daysMap.forEach((dayObj, index) => {
+                const dayNum = index + 1;
+                const classes = schedule[dayNum];
+                const dateText = document.getElementById(`date-${dayObj.id}`).textContent;
+                const isToday = index === todayIndex;
+
+                const dayCard = document.createElement('div');
+                dayCard.className = 'day-card';
+                dayCard.innerHTML = `
+                    <div class="day-header ${isToday ? 'today' : ''}">
+                        <div class="day-name ${isToday ? 'today' : ''}">
+                            ${dayObj.label}
+                            <span class="today-dot"></span>
+                        </div>
+                        <div class="day-date">${dateText}</div>
+                    </div>
+                `;
+
+                const dayClasses = document.createElement('div');
+                dayClasses.className = 'day-classes';
+
+                if (classes && classes.length > 0) {
+                    classes.forEach((cls, classIndex) => {
+                        const card = createClassCard(cls, dayNum, classIndex, currentMinutes, dayOfWeek, true);
+                        dayClasses.appendChild(card);
+                    });
+                } else {
+                    dayClasses.innerHTML = '<div class="mobile-no-class">Sin clases</div>';
+                }
+
+                dayCard.appendChild(dayClasses);
+                mobileSchedule.appendChild(dayCard);
+            });
 
             const indicator = document.getElementById('statusIndicator');
             const classText = document.getElementById('currentClassText');
@@ -613,13 +692,13 @@
         }
 
         async function sendWebhookMessage() {
-            const sendBtn = document.getElementById('sendBtn');
+            const sendNowBtn = document.getElementById('sendNowBtn');
             const cooldownText = document.getElementById('cooldownText');
             const messageInput = document.getElementById('customMessage');
             const messageText = messageInput.value.trim();
 
             if (!messageText) {
-                cooldownText.textContent = '⚠️ Escribe un mensaje primero';
+                cooldownText.textContent = '⚠️ Escribe algo';
                 cooldownText.style.color = '#c41e3a';
                 return;
             }
@@ -627,45 +706,39 @@
             const now = Date.now();
             if (now - lastMessageTime < COOLDOWN) {
                 const remaining = Math.ceil((COOLDOWN - (now - lastMessageTime)) / 1000);
-                cooldownText.textContent = `⏳ Espera ${remaining}s`;
+                cooldownText.textContent = `⏳ ${remaining}s`;
                 cooldownText.style.color = '#666';
                 return;
             }
 
-            const payload = {
-                content: messageText
-            };
-
             try {
-                sendBtn.disabled = true;
-                cooldownText.textContent = '📤 Enviando...';
+                sendNowBtn.disabled = true;
+                cooldownText.textContent = 'Enviando...';
                 cooldownText.style.color = '#666';
 
                 const response = await fetch(WEBHOOK_URL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: messageText })
                 });
 
                 if (response.ok || response.status === 204) {
                     lastMessageTime = Date.now();
-                    cooldownText.textContent = '✅ Mensaje enviado';
+                    cooldownText.textContent = '✅ Enviado';
                     cooldownText.style.color = '#22c55e';
                     messageInput.value = '';
                     setTimeout(() => {
                         cooldownText.textContent = '';
-                    }, 2000);
+                        document.getElementById('messageBox').classList.remove('active');
+                    }, 1500);
                 } else {
-                    throw new Error('Error en la respuesta');
+                    throw new Error('Error');
                 }
             } catch (error) {
-                cooldownText.textContent = '❌ Error al enviar';
+                cooldownText.textContent = 'Error';
                 cooldownText.style.color = '#c41e3a';
-                console.error('Error:', error);
             } finally {
-                sendBtn.disabled = false;
+                sendNowBtn.disabled = false;
             }
         }
 
