@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Horario de Clases</title>
+    <title>Horario de Clases v1.3</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -13,6 +13,7 @@
         .container { max-width: 1400px; margin: 0 auto; }
         .header { background: white; border-radius: 20px; padding: 24px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
         .header-content h1 { color: #c41e3a; font-size: 1.75rem; font-weight: 700; margin-bottom: 6px; }
+        .header-content h1 .version { color: #999; font-size: 1rem; font-weight: 500; margin-left: 10px; }
         .header-content p { color: #666; font-size: 0.95rem; font-weight: 500; }
         .message-section { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; min-width: 250px; }
         .send-btn { padding: 12px 24px; background: linear-gradient(135deg, #c41e3a 0%, #a01830 100%); color: white; border: none; border-radius: 12px; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: all 0.3s ease; font-family: 'Inter', sans-serif; display: flex; align-items: center; gap: 8px; }
@@ -120,6 +121,7 @@
         .class-card.ended .class-status-text { background: #999; color: white; }
         .class-status-text.ending { background: #ef4444 !important; color: white !important; }
         .class-status-text.ended-status { background: #6b7280 !important; color: white !important; }
+        .class-status-text.next-soon { background: #3b82f6 !important; color: white !important; }
         .admin-controls { display: none; margin-top: 8px; gap: 6px; flex-wrap: wrap; }
         .admin-mode .admin-controls { display: flex; }
         .admin-btn { padding: 4px 10px; border: none; border-radius: 5px; font-size: 0.7rem; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
@@ -186,6 +188,7 @@
             .mobile-class-card.ended .mobile-class-status-text { background: #999; color: white; }
             .mobile-class-status-text.ending { background: #ef4444 !important; color: white !important; }
             .mobile-class-status-text.ended-status { background: #6b7280 !important; color: white !important; }
+            .mobile-class-status-text.next-soon { background: #3b82f6 !important; color: white !important; }
             .mobile-no-class { text-align: center; color: #aaa; font-size: 0.8rem; padding: 16px; font-style: italic; }
             .legend { justify-content: center; }
         }
@@ -195,11 +198,11 @@
     <div class="container">
         <div class="header">
             <div class="header-content">
-                <h1>📚 Mi Horario de Clases</h1>
+                <h1>📚 Mi Horario de Clases <span class="version">v1.3</span></h1>
                 <p>Materias</p>
             </div>
             <div class="message-section">
-                <button class="send-btn" id="mainSendBtn" onclick="toggleMessageBox()"> Enviar Mensaje</button>
+                <button class="send-btn" id="mainSendBtn" onclick="toggleMessageBox()">📤 Enviar Mensaje</button>
                 <div class="message-box" id="messageBox">
                     <textarea id="customMessage" placeholder="Escribe tu mensaje aquí..."></textarea>
                     <div class="message-actions">
@@ -231,11 +234,11 @@
             </div>
             <div class="checkin-status" id="checkinStatus">Aún no se ha confirmado la llegada hoy</div>
             <div class="checkin-actions" id="checkinActions">
-                <button class="checkin-action-btn edit" onclick="editCheckinTime()">✏️ Editar Hora</button>
-                <button class="checkin-action-btn remove" onclick="removeCheckin()">️ Quitar Confirmación</button>
+                <button class="checkin-action-btn edit" onclick="editCheckinTime()">️ Editar Hora</button>
+                <button class="checkin-action-btn remove" onclick="removeCheckin()">🗑️ Quitar Confirmación</button>
             </div>
             <div class="checkin-history" id="checkinHistory" style="display: none;">
-                <div class="checkin-history-title"> Historial de Llegadas</div>
+                <div class="checkin-history-title">📋 Historial de Llegadas</div>
                 <div id="checkinEntries"></div>
             </div>
         </div>
@@ -243,7 +246,7 @@
         <div class="comments-section">
             <div class="comments-header">
                 <div class="comments-title">💬 Comentarios</div>
-                <button class="add-comment-btn" onclick="toggleCommentForm()"> Añadir Comentario</button>
+                <button class="add-comment-btn" onclick="toggleCommentForm()">➕ Añadir Comentario</button>
             </div>
             <div class="comment-form" id="commentForm">
                 <textarea id="commentInput" placeholder="Escribe un comentario..."></textarea>
@@ -292,6 +295,7 @@
             <div class="legend">
                 <div class="legend-item"><div class="legend-dot green"></div><span>En clase ahora</span></div>
                 <div class="legend-item"><div class="legend-dot red"></div><span>Termina en &lt;25 min</span></div>
+                <div class="legend-item"><div class="legend-dot blue"></div><span>Próxima clase en &lt;25 min</span></div>
                 <div class="legend-item"><div class="legend-dot yellow"></div><span>Próxima clase</span></div>
                 <div class="legend-item"><div class="legend-dot gray"></div><span>Sin clase</span></div>
                 <div class="legend-item"><div class="legend-dot dark"></div><span>Terminada</span></div>
@@ -305,7 +309,7 @@
 
     <div class="modal-overlay" id="passwordModal">
         <div class="modal">
-            <h3>🔐 Ingresar Contraseña</h3>
+            <h3> Ingresar Contraseña</h3>
             <input type="password" id="passwordInput" placeholder="Contraseña" onkeypress="if(event.key==='Enter')checkPassword()">
             <div class="modal-buttons">
                 <button class="modal-btn cancel" onclick="closePasswordModal()">Cancelar</button>
@@ -367,6 +371,7 @@
         let checkinData = {};
         let commentsData = {};
         let isEditingAttendance = false;
+        let editingInputInfo = null;
 
         function toggleMessageBox() {
             document.getElementById('messageBox').classList.toggle('active');
@@ -542,8 +547,7 @@
                 if (todayCheckin) {
                     const updatedEntry = {
                         ...todayCheckin,
-                        time: newTime,
-                        message: `Adrian confirmó su llegada a INACAP (editado)`
+                        time: newTime
                     };
                     checkinRef.child(today).set(updatedEntry);
                 }
@@ -606,12 +610,12 @@
 
         classOverridesRef.on('value', (snapshot) => {
             classOverrides = snapshot.val() || {};
-            updateSchedule();
+            if (!isEditingAttendance) updateSchedule();
         });
 
         attendanceRef.on('value', (snapshot) => {
             attendanceData = snapshot.val() || {};
-            updateSchedule();
+            if (!isEditingAttendance) updateSchedule();
         });
 
         announcementsRef.on('value', (snapshot) => {
@@ -641,7 +645,7 @@
         function updateCheckinStatus() {
             const today = getTodayStr();
             const todayCheckin = checkinData[today];
-            const hasCheckedIn = !!todayCheckin;
+            const hasCheckedIn = !!todayCheckin && todayCheckin.time;
             
             const btn = document.getElementById('checkinBtn');
             const btnText = document.getElementById('checkinBtnText');
@@ -669,7 +673,7 @@
 
             Object.keys(checkinData).sort().reverse().forEach(date => {
                 const entry = checkinData[date];
-                if (entry) {
+                if (entry && entry.time && entry.date && entry.message) {
                     allEntries.push({ date, ...entry });
                 }
             });
@@ -716,7 +720,41 @@
             return 'low';
         }
 
-        function createClassCard(cls, dayNum, classIndex, currentMinutes, dayOfWeek, isMobile) {
+        function getNextClassInfo(dayOfWeek, currentMinutes) {
+            const daysMap = [
+                { id: 'lunes', label: 'LUNES', dayNum: 1 },
+                { id: 'martes', label: 'MARTES', dayNum: 2 },
+                { id: 'miercoles', label: 'MIÉRCOLES', dayNum: 3 },
+                { id: 'jueves', label: 'JUEVES', dayNum: 4 },
+                { id: 'viernes', label: 'VIERNES', dayNum: 5 },
+                { id: 'sabado', label: 'SÁBADO', dayNum: 6 }
+            ];
+
+            const todayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+
+            for (let i = todayIndex; i < 6; i++) {
+                const dayInfo = daysMap[i];
+                const classes = schedule[dayInfo.dayNum];
+                if (!classes) continue;
+
+                for (let j = 0; j < classes.length; j++) {
+                    const cls = classes[j];
+                    const startMinutes = timeToMinutes(cls.start);
+                    const endMinutes = timeToMinutes(cls.end);
+
+                    if (i === todayIndex && currentMinutes < startMinutes) {
+                        const minutesUntil = startMinutes - currentMinutes;
+                        return { name: cls.name, room: cls.room, start: cls.start, minutesUntil, sameDay: true };
+                    } else if (i > todayIndex) {
+                        const minutesUntil = (i - todayIndex) * 24 * 60 + (startMinutes - currentMinutes);
+                        return { name: cls.name, room: cls.room, start: cls.start, minutesUntil, sameDay: false };
+                    }
+                }
+            }
+            return null;
+        }
+
+        function createClassCard(cls, dayNum, classIndex, currentMinutes, dayOfWeek, isMobile, nextClassInfo) {
             const startMinutes = timeToMinutes(cls.start);
             const endMinutes = timeToMinutes(cls.end);
             const overrideKey = `${dayNum}_${classIndex}`;
@@ -727,9 +765,9 @@
             let statusText = '';
             let endingText = '';
             let endedText = '';
+            let nextSoonText = '';
             let cardClass = '';
 
-            // Solo aplicar override si es del día de hoy
             const isTodayOverride = override && override.date === today;
 
             if (isTodayOverride && override.status === 'ended') {
@@ -760,6 +798,10 @@
                 } else if (currentMinutes >= endMinutes) {
                     endedText = 'Clase terminada';
                     cardClass = 'ended';
+                } else if (currentMinutes >= startMinutes - 25 && currentMinutes < startMinutes) {
+                    const minutesUntil = startMinutes - currentMinutes;
+                    nextSoonText = `Próxima clase en ${minutesUntil} min`;
+                    cardClass = 'soon';
                 } else if (currentMinutes >= startMinutes - 5 && currentMinutes < startMinutes) {
                     statusText = `Comienza en ${startMinutes - currentMinutes} min`;
                     cardClass = 'soon';
@@ -778,18 +820,19 @@
             let html = `
                 <div class="status-dot"></div>
                 <div class="${nameClass}">${cls.name}</div>
-                <div class="${timeClass}"> ${cls.start} - ${cls.end}</div>
-                <div class="${roomClass}"> ${cls.room}</div>
+                <div class="${timeClass}">🕐 ${cls.start} - ${cls.end}</div>
+                <div class="${roomClass}">📍 ${cls.room}</div>
                 <div class="attendance-row">
                     <span class="att-badge ${getAttClass(attVal)}">Asistencia: ${attVal}%</span>
                     <input type="number" class="att-input" min="0" max="100" value="${attVal}" 
                            data-day-idx="${dayNum}" data-class-idx="${classIndex}"
-                           onfocus="isEditingAttendance = true" 
-                           onblur="isEditingAttendance = false; updateAttendance(${dayNum}, ${classIndex}, this.value)">
+                           onfocus="isEditingAttendance = true; editingInputInfo = {day: ${dayNum}, cls: ${classIndex}, val: this.value};" 
+                           onblur="isEditingAttendance = false; editingInputInfo = null; updateAttendance(${dayNum}, ${classIndex}, this.value)">
                 </div>
                 <div>
                     ${statusText ? `<span class="${statusClass}">${statusText}</span>` : ''}
                     ${endingText ? `<span class="${statusClass} ending">${endingText}</span>` : ''}
+                    ${nextSoonText ? `<span class="${statusClass} next-soon">${nextSoonText}</span>` : ''}
                     ${endedText ? `<span class="${statusClass} ended-status">${endedText}</span>` : ''}
                 </div>
                 <div class="admin-controls">
@@ -805,19 +848,17 @@
         }
 
         function updateSchedule() {
+            if (isEditingAttendance) {
+                updateClockOnly();
+                return;
+            }
+
             updateWeekDates();
             const now = new Date();
             const currentMinutes = getCurrentTimeInMinutes();
             const dayOfWeek = now.getDay();
 
             document.getElementById('currentTime').textContent = now.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-
-            // Guardar estado del input enfocado antes de re-renderizar
-            const activeEl = document.activeElement;
-            const activeDayIdx = activeEl?.dataset?.dayIdx;
-            const activeClassIdx = activeEl?.dataset?.classIdx;
-            const activeValue = activeEl?.value;
-            const wasEditing = activeEl?.classList?.contains('att-input');
 
             let activeClass = null;
             let soonClass = null;
@@ -837,6 +878,8 @@
                 document.getElementById(dayObj.id).innerHTML = '<div class="no-class">Sin clases</div>';
             });
 
+            const nextClassInfo = getNextClassInfo(dayOfWeek, currentMinutes);
+
             for (let day = 1; day <= 6; day++) {
                 const dayObj = daysMap[day - 1];
                 const dayElement = document.getElementById(dayObj.id);
@@ -845,7 +888,7 @@
                 if (classes && classes.length > 0) {
                     dayElement.innerHTML = '';
                     classes.forEach((cls, classIndex) => {
-                        const card = createClassCard(cls, day, classIndex, currentMinutes, dayOfWeek, false);
+                        const card = createClassCard(cls, day, classIndex, currentMinutes, dayOfWeek, false, nextClassInfo);
                         dayElement.appendChild(card);
 
                         if (card.classList.contains('active') && !activeClass) activeClass = cls;
@@ -880,7 +923,7 @@
 
                 if (classes && classes.length > 0) {
                     classes.forEach((cls, classIndex) => {
-                        const card = createClassCard(cls, dayNum, classIndex, currentMinutes, dayOfWeek, true);
+                        const card = createClassCard(cls, dayNum, classIndex, currentMinutes, dayOfWeek, true, nextClassInfo);
                         dayClasses.appendChild(card);
                     });
                 } else {
@@ -891,32 +934,27 @@
                 mobileSchedule.appendChild(dayCard);
             });
 
-            // Restaurar foco del input de asistencia si estaba editando
-            if (wasEditing && activeDayIdx && activeClassIdx) {
-                setTimeout(() => {
-                    const newInput = document.querySelector(`.att-input[data-day-idx="${activeDayIdx}"][data-class-idx="${activeClassIdx}"]`);
-                    if (newInput) {
-                        newInput.value = activeValue;
-                        newInput.focus();
-                        // Seleccionar el texto para seguir editando
-                        newInput.select();
-                    }
-                }, 10);
-            }
-
             const indicator = document.getElementById('statusIndicator');
             const classText = document.getElementById('currentClassText');
 
             if (activeClass) {
                 indicator.className = 'status-indicator active';
                 classText.textContent = `${activeClass.name} - ${activeClass.room}`;
+            } else if (nextClassInfo && nextClassInfo.minutesUntil <= 25) {
+                indicator.className = 'status-indicator soon';
+                classText.textContent = `⏰ Próxima: ${nextClassInfo.name} en ${nextClassInfo.minutesUntil} min`;
             } else if (soonClass) {
                 indicator.className = 'status-indicator soon';
-                classText.textContent = ` Próxima: ${soonClass.name} en 5 min`;
+                classText.textContent = `⏰ Próxima: ${soonClass.name} en 5 min`;
             } else {
                 indicator.className = 'status-indicator';
                 classText.textContent = '💤 Sin clases en este momento';
             }
+        }
+
+        function updateClockOnly() {
+            const now = new Date();
+            document.getElementById('currentTime').textContent = now.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         }
 
         async function sendWebhookMessage() {
