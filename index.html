@@ -110,7 +110,8 @@
         .att-badge.high { background: #dcfce7; color: #166534; }
         .att-badge.medium { background: #fef3c7; color: #92400e; }
         .att-badge.low { background: #fee2e2; color: #991b1b; }
-        .att-input { width: 50px; padding: 3px 6px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.7rem; font-family: 'Inter', sans-serif; display: none; }
+        .att-input { width: 55px; padding: 3px 6px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.75rem; font-family: 'Inter', sans-serif; display: none; }
+        .att-input:focus { outline: none; border-color: #c41e3a; box-shadow: 0 0 0 2px rgba(196, 30, 58, 0.2); }
         .admin-mode .att-badge { display: none; }
         .admin-mode .att-input { display: block; }
         .class-status-text { font-size: 0.65rem; margin-top: 5px; padding: 2px 6px; border-radius: 4px; display: inline-block; font-weight: 500; margin-right: 4px; }
@@ -194,11 +195,11 @@
     <div class="container">
         <div class="header">
             <div class="header-content">
-                <h1> Mi Horario de Clases</h1>
+                <h1>📚 Mi Horario de Clases</h1>
                 <p>Materias</p>
             </div>
             <div class="message-section">
-                <button class="send-btn" id="mainSendBtn" onclick="toggleMessageBox()">📤 Enviar Mensaje</button>
+                <button class="send-btn" id="mainSendBtn" onclick="toggleMessageBox()"> Enviar Mensaje</button>
                 <div class="message-box" id="messageBox">
                     <textarea id="customMessage" placeholder="Escribe tu mensaje aquí..."></textarea>
                     <div class="message-actions">
@@ -231,10 +232,10 @@
             <div class="checkin-status" id="checkinStatus">Aún no se ha confirmado la llegada hoy</div>
             <div class="checkin-actions" id="checkinActions">
                 <button class="checkin-action-btn edit" onclick="editCheckinTime()">✏️ Editar Hora</button>
-                <button class="checkin-action-btn remove" onclick="removeCheckin()">🗑️ Quitar Confirmación</button>
+                <button class="checkin-action-btn remove" onclick="removeCheckin()">️ Quitar Confirmación</button>
             </div>
             <div class="checkin-history" id="checkinHistory" style="display: none;">
-                <div class="checkin-history-title">📋 Historial de Llegadas</div>
+                <div class="checkin-history-title"> Historial de Llegadas</div>
                 <div id="checkinEntries"></div>
             </div>
         </div>
@@ -242,7 +243,7 @@
         <div class="comments-section">
             <div class="comments-header">
                 <div class="comments-title">💬 Comentarios</div>
-                <button class="add-comment-btn" onclick="toggleCommentForm()">➕ Añadir Comentario</button>
+                <button class="add-comment-btn" onclick="toggleCommentForm()"> Añadir Comentario</button>
             </div>
             <div class="comment-form" id="commentForm">
                 <textarea id="commentInput" placeholder="Escribe un comentario..."></textarea>
@@ -365,13 +366,17 @@
         let currentAnnouncement = "";
         let checkinData = {};
         let commentsData = {};
-        let attUpdateTimeout = null;
+        let isEditingAttendance = false;
 
         function toggleMessageBox() {
             document.getElementById('messageBox').classList.toggle('active');
             if (document.getElementById('messageBox').classList.contains('active')) {
                 setTimeout(() => document.getElementById('customMessage').focus(), 100);
             }
+        }
+
+        function getTodayStr() {
+            return new Date().toISOString().split('T')[0];
         }
 
         function updateWeekDates() {
@@ -435,7 +440,12 @@
         }
 
         function endClass(dayIndex, classIndex) {
-            classOverridesRef.child(`${dayIndex}_${classIndex}`).set({ status: 'ended', timestamp: Date.now() });
+            const today = getTodayStr();
+            classOverridesRef.child(`${dayIndex}_${classIndex}`).set({ 
+                status: 'ended', 
+                date: today,
+                timestamp: Date.now() 
+            });
         }
 
         function activateClass(dayIndex, classIndex) {
@@ -446,26 +456,28 @@
                 alert('No se puede reactivar: la hora ya terminó');
                 return;
             }
-            classOverridesRef.child(`${dayIndex}_${classIndex}`).set({ status: 'active', timestamp: Date.now() });
+            const today = getTodayStr();
+            classOverridesRef.child(`${dayIndex}_${classIndex}`).set({ 
+                status: 'active', 
+                date: today,
+                timestamp: Date.now() 
+            });
         }
 
         function updateAttendance(dayIndex, classIndex, value) {
             let val = parseInt(value);
-            if (isNaN(val)) val = 0;
+            if (isNaN(val)) return;
             if (val < 0) val = 0;
             if (val > 100) val = 100;
 
-            if (attUpdateTimeout) clearTimeout(attUpdateTimeout);
-            attUpdateTimeout = setTimeout(() => {
-                const className = schedule[dayIndex][classIndex].name;
-                Object.keys(schedule).forEach(day => {
-                    schedule[day].forEach((cls, idx) => {
-                        if (cls.name === className) {
-                            attendanceRef.child(`${day}_${idx}`).set(val);
-                        }
-                    });
+            const className = schedule[dayIndex][classIndex].name;
+            Object.keys(schedule).forEach(day => {
+                schedule[day].forEach((cls, idx) => {
+                    if (cls.name === className) {
+                        attendanceRef.child(`${day}_${idx}`).set(val);
+                    }
                 });
-            }, 500);
+            });
         }
 
         function toggleEditAnnouncement() {
@@ -511,8 +523,8 @@
                 message: `Adrian confirmó su llegada a INACAP`
             };
 
-            const todayKey = now.toISOString().split('T')[0];
-            checkinRef.child(todayKey).push(checkinEntry);
+            const todayKey = getTodayStr();
+            checkinRef.child(todayKey).set(checkinEntry);
 
             btn.classList.add('checked');
             btnText.textContent = '✅ Llegada Confirmada';
@@ -524,17 +536,16 @@
         function editCheckinTime() {
             const newTime = prompt('Ingresa la nueva hora de llegada (ej: 08:30):');
             if (newTime && /^\d{2}:\d{2}$/.test(newTime)) {
-                const today = new Date().toISOString().split('T')[0];
-                const todayCheckins = checkinData[today] || {};
-                const lastKey = Object.keys(todayCheckins).pop();
+                const today = getTodayStr();
+                const todayCheckin = checkinData[today];
                 
-                if (lastKey) {
+                if (todayCheckin) {
                     const updatedEntry = {
-                        ...todayCheckins[lastKey],
+                        ...todayCheckin,
                         time: newTime,
                         message: `Adrian confirmó su llegada a INACAP (editado)`
                     };
-                    checkinRef.child(`${today}/${lastKey}`).update(updatedEntry);
+                    checkinRef.child(today).set(updatedEntry);
                 }
             } else if (newTime) {
                 alert('Formato inválido. Usa HH:MM (ej: 08:30)');
@@ -543,7 +554,7 @@
 
         function removeCheckin() {
             if (confirm('¿Seguro que quieres quitar la confirmación de llegada de hoy?')) {
-                const today = new Date().toISOString().split('T')[0];
+                const today = getTodayStr();
                 checkinRef.child(today).remove();
             }
         }
@@ -628,9 +639,9 @@
         });
 
         function updateCheckinStatus() {
-            const today = new Date().toISOString().split('T')[0];
-            const todayCheckins = checkinData[today] || {};
-            const hasCheckedIn = Object.keys(todayCheckins).length > 0;
+            const today = getTodayStr();
+            const todayCheckin = checkinData[today];
+            const hasCheckedIn = !!todayCheckin;
             
             const btn = document.getElementById('checkinBtn');
             const btnText = document.getElementById('checkinBtnText');
@@ -639,8 +650,7 @@
             if (hasCheckedIn) {
                 btn.classList.add('checked');
                 btnText.textContent = '✅ Llegada Confirmada';
-                const lastCheckin = Object.values(todayCheckins).pop();
-                status.textContent = `Confirmado a las ${lastCheckin.time} - ¡Buenas clases!`;
+                status.textContent = `Confirmado a las ${todayCheckin.time} - ¡Buenas clases!`;
                 status.style.color = '#22c55e';
                 status.style.fontWeight = '600';
             } else {
@@ -658,10 +668,10 @@
             const allEntries = [];
 
             Object.keys(checkinData).sort().reverse().forEach(date => {
-                const dayCheckins = checkinData[date];
-                Object.values(dayCheckins).forEach(entry => {
+                const entry = checkinData[date];
+                if (entry) {
                     allEntries.push({ date, ...entry });
-                });
+                }
             });
 
             if (allEntries.length > 0) {
@@ -712,16 +722,20 @@
             const overrideKey = `${dayNum}_${classIndex}`;
             const override = classOverrides[overrideKey];
             const attVal = attendanceData[overrideKey] !== undefined ? attendanceData[overrideKey] : 0;
+            const today = getTodayStr();
 
             let statusText = '';
             let endingText = '';
             let endedText = '';
             let cardClass = '';
 
-            if (override && override.status === 'ended') {
+            // Solo aplicar override si es del día de hoy
+            const isTodayOverride = override && override.date === today;
+
+            if (isTodayOverride && override.status === 'ended') {
                 cardClass = 'ended';
-                statusText = 'Terminada manualmente';
-            } else if (override && override.status === 'active') {
+                endedText = 'Clase terminada';
+            } else if (isTodayOverride && override.status === 'active') {
                 cardClass = 'active';
                 const timeLeft = endMinutes - currentMinutes;
                 if (timeLeft > 0 && timeLeft <= 25) {
@@ -753,7 +767,7 @@
             }
 
             const canEnd = cardClass === 'active' || (dayNum === dayOfWeek && currentMinutes >= startMinutes && currentMinutes < endMinutes);
-            const canActivate = cardClass === 'ended' && currentMinutes < endMinutes;
+            const canActivate = cardClass === 'ended' && currentMinutes < endMinutes && dayNum === dayOfWeek;
 
             const nameClass = isMobile ? 'mobile-class-name' : 'class-name';
             const timeClass = isMobile ? 'mobile-class-time' : 'class-time';
@@ -764,11 +778,14 @@
             let html = `
                 <div class="status-dot"></div>
                 <div class="${nameClass}">${cls.name}</div>
-                <div class="${timeClass}">🕐 ${cls.start} - ${cls.end}</div>
-                <div class="${roomClass}">📍 ${cls.room}</div>
+                <div class="${timeClass}"> ${cls.start} - ${cls.end}</div>
+                <div class="${roomClass}"> ${cls.room}</div>
                 <div class="attendance-row">
                     <span class="att-badge ${getAttClass(attVal)}">Asistencia: ${attVal}%</span>
-                    <input type="number" class="att-input" min="0" max="100" value="${attVal}" onblur="updateAttendance(${dayNum}, ${classIndex}, this.value)">
+                    <input type="number" class="att-input" min="0" max="100" value="${attVal}" 
+                           data-day-idx="${dayNum}" data-class-idx="${classIndex}"
+                           onfocus="isEditingAttendance = true" 
+                           onblur="isEditingAttendance = false; updateAttendance(${dayNum}, ${classIndex}, this.value)">
                 </div>
                 <div>
                     ${statusText ? `<span class="${statusClass}">${statusText}</span>` : ''}
@@ -794,6 +811,13 @@
             const dayOfWeek = now.getDay();
 
             document.getElementById('currentTime').textContent = now.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+            // Guardar estado del input enfocado antes de re-renderizar
+            const activeEl = document.activeElement;
+            const activeDayIdx = activeEl?.dataset?.dayIdx;
+            const activeClassIdx = activeEl?.dataset?.classIdx;
+            const activeValue = activeEl?.value;
+            const wasEditing = activeEl?.classList?.contains('att-input');
 
             let activeClass = null;
             let soonClass = null;
@@ -867,6 +891,19 @@
                 mobileSchedule.appendChild(dayCard);
             });
 
+            // Restaurar foco del input de asistencia si estaba editando
+            if (wasEditing && activeDayIdx && activeClassIdx) {
+                setTimeout(() => {
+                    const newInput = document.querySelector(`.att-input[data-day-idx="${activeDayIdx}"][data-class-idx="${activeClassIdx}"]`);
+                    if (newInput) {
+                        newInput.value = activeValue;
+                        newInput.focus();
+                        // Seleccionar el texto para seguir editando
+                        newInput.select();
+                    }
+                }, 10);
+            }
+
             const indicator = document.getElementById('statusIndicator');
             const classText = document.getElementById('currentClassText');
 
@@ -875,7 +912,7 @@
                 classText.textContent = `${activeClass.name} - ${activeClass.room}`;
             } else if (soonClass) {
                 indicator.className = 'status-indicator soon';
-                classText.textContent = `⏰ Próxima: ${soonClass.name} en 5 min`;
+                classText.textContent = ` Próxima: ${soonClass.name} en 5 min`;
             } else {
                 indicator.className = 'status-indicator';
                 classText.textContent = '💤 Sin clases en este momento';
@@ -889,7 +926,7 @@
             const messageText = messageInput.value.trim();
 
             if (!messageText) {
-                cooldownText.textContent = '️ Escribe algo';
+                cooldownText.textContent = '⚠️ Escribe algo';
                 cooldownText.style.color = '#c41e3a';
                 return;
             }
@@ -926,7 +963,7 @@
                     throw new Error('Error');
                 }
             } catch (error) {
-                cooldownText.textContent = 'Error';
+                cooldownText.textContent = '❌ Error';
                 cooldownText.style.color = '#c41e3a';
             } finally {
                 sendNowBtn.disabled = false;
